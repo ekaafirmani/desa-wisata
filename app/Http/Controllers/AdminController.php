@@ -12,6 +12,7 @@ use App\Models\TransaksiKuliner;
 use App\Models\PaketTubing;
 use App\Models\MenuKuliner;
 use App\Models\MasterStok;
+use App\Models\SewaGazebo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,24 +21,24 @@ class AdminController extends Controller
     // Halaman dashboard utama admin
     public function dashboard()
     {
-    // === Kartu ringkasan HARI INI ===
+        // === Kartu ringkasan HARI INI ===
         $today = today();
 
         $pendapatanHariIni = [
             'tiket_masuk' => TiketMasuk::whereDate('created_at', $today)->sum('total_bayar'),
-            'tubing'      => TransaksiTubing::whereDate('created_at', $today)->sum('total_bayar'),
-            'kolam'       => TiketKolam::whereDate('created_at', $today)->sum('total_bayar') +
-                            SewaPelampung::whereDate('created_at', $today)->sum('total_bayar'),
-            'kuliner'     => TransaksiKuliner::whereDate('created_at', $today)->sum('total_bayar'),
-            'pakan_ikan'  => PakanIkan::whereDate('created_at', $today)->sum('total_bayar'),
+            'tubing' => TransaksiTubing::whereDate('created_at', $today)->sum('total_bayar'),
+            'kolam' => TiketKolam::whereDate('created_at', $today)->sum('total_bayar') +
+                SewaPelampung::whereDate('created_at', $today)->sum('total_bayar'),
+            'kuliner' => TransaksiKuliner::whereDate('created_at', $today)->sum('total_bayar'),
+            'pakan_ikan' => PakanIkan::whereDate('created_at', $today)->sum('total_bayar'),
         ];
 
         $totalHariIni = array_sum($pendapatanHariIni);
 
         // === Total petugas aktif ===
         $totalPetugas = User::where('role', '!=', 'admin')
-                            ->where('aktif', true)
-                            ->count();
+            ->where('aktif', true)
+            ->count();
 
         // === Stok hampir habis (tersedia <= 5) ===
         $stokHampirHabis = MasterStok::where('tersedia', '<=', 5)->get();
@@ -49,10 +50,10 @@ class AdminController extends Controller
             TiketMasuk::whereDate('created_at', $today)
                 ->latest()->limit(5)
                 ->get()->map(fn($t) => [
-                    'waktu'    => $t->created_at->format('H:i'),
+                    'waktu' => $t->created_at->format('H:i'),
                     'kategori' => 'Tiket Masuk',
-                    'detail'   => ucfirst($t->jenis_kendaraan) . ' x' . $t->jumlah,
-                    'total'    => $t->total_bayar,
+                    'detail' => ucfirst($t->jenis_kendaraan) . ' x' . $t->jumlah,
+                    'total' => $t->total_bayar,
                 ])
         );
 
@@ -60,10 +61,10 @@ class AdminController extends Controller
             TransaksiTubing::with('paket')->whereDate('created_at', $today)
                 ->latest()->limit(5)
                 ->get()->map(fn($t) => [
-                    'waktu'    => $t->created_at->format('H:i'),
+                    'waktu' => $t->created_at->format('H:i'),
                     'kategori' => 'Tubing',
-                    'detail'   => ($t->paket->nama_paket ?? '-') . ' x' . $t->jumlah_peserta . ' org',
-                    'total'    => $t->total_bayar,
+                    'detail' => ($t->paket->nama_paket ?? '-') . ' x' . $t->jumlah_peserta . ' org',
+                    'total' => $t->total_bayar,
                 ])
         );
 
@@ -71,10 +72,10 @@ class AdminController extends Controller
             TiketKolam::whereDate('created_at', $today)
                 ->latest()->limit(5)
                 ->get()->map(fn($t) => [
-                    'waktu'    => $t->created_at->format('H:i'),
+                    'waktu' => $t->created_at->format('H:i'),
                     'kategori' => 'Tiket Kolam',
-                    'detail'   => $t->jumlah_orang . ' orang',
-                    'total'    => $t->total_bayar,
+                    'detail' => $t->jumlah_orang . ' orang',
+                    'total' => $t->total_bayar,
                 ])
         );
 
@@ -82,10 +83,10 @@ class AdminController extends Controller
             TransaksiKuliner::whereDate('created_at', $today)
                 ->latest()->limit(5)
                 ->get()->map(fn($t) => [
-                    'waktu'    => $t->created_at->format('H:i'),
+                    'waktu' => $t->created_at->format('H:i'),
                     'kategori' => 'Kuliner',
-                    'detail'   => 'Transaksi #' . $t->id,
-                    'total'    => $t->total_bayar,
+                    'detail' => 'Transaksi #' . $t->id,
+                    'total' => $t->total_bayar,
                 ])
         );
 
@@ -93,10 +94,10 @@ class AdminController extends Controller
             PakanIkan::whereDate('created_at', $today)
                 ->latest()->limit(5)
                 ->get()->map(fn($t) => [
-                    'waktu'    => $t->created_at->format('H:i'),
+                    'waktu' => $t->created_at->format('H:i'),
                     'kategori' => 'Pakan Ikan',
-                    'detail'   => $t->jumlah_porsi . ' porsi (' . $t->titik_jual . ')',
-                    'total'    => $t->total_bayar,
+                    'detail' => $t->jumlah_porsi . ' porsi (' . $t->titik_jual . ')',
+                    'total' => $t->total_bayar,
                 ])
         );
 
@@ -107,7 +108,7 @@ class AdminController extends Controller
         $grafikData = [];
         for ($i = 29; $i >= 0; $i--) {
             $tanggal = now()->subDays($i)->toDateString();
-            $label   = now()->subDays($i)->format('d M');
+            $label = now()->subDays($i)->format('d M');
 
             $total = TiketMasuk::whereDate('created_at', $tanggal)->sum('total_bayar')
                 + TransaksiTubing::whereDate('created_at', $tanggal)->sum('total_bayar')
@@ -128,42 +129,42 @@ class AdminController extends Controller
             'grafikData'
         ));
     }
-        
-        // Halaman daftar semua petugas
-        public function petugas ()
-        {
-            $petugas = User::where('role', '!=', 'admin')->get();
-            return view('admin.petugas.index', compact('petugas'));
-        }
 
-        //Form tambah petugas baru
-        public function tambahPetugas()
-        {
-            return view('admin.petugas.tambah');
-        }
+    // Halaman daftar semua petugas
+    public function petugas()
+    {
+        $petugas = User::where('role', '!=', 'admin')->get();
+        return view('admin.petugas.index', compact('petugas'));
+    }
 
-        //Simpa petugas baru ke database
-        public function simpanPetugas(Request $request)
-        {
-            $request->validate([
-                'name'     => 'required|string|max:100',
-                'email'    => 'required|email|unique:users',
-                'password' => 'required|min:6',
-                'role'     => 'required|in:loket,tubing_mini,tubing_dewasa,kolam,kuliner',
-            ]);
+    //Form tambah petugas baru
+    public function tambahPetugas()
+    {
+        return view('admin.petugas.tambah');
+    }
 
-            User::create([
-                'name'       => $request->name,
-                'email'      => $request->email,
-                'password'   => Hash::make($request->password),
-                'role'       => $request->role,
-                'aktif'      => true,
-                'created_by' => auth()->id(),
-            ]);
+    //Simpa petugas baru ke database
+    public function simpanPetugas(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'role' => 'required|in:loket,tubing_mini,tubing_dewasa,kolam,kuliner',
+        ]);
 
-            return redirect()->route('admin.petugas')
-                            ->with('success', 'Petugas berhasil ditambahkan!');
-        }
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'aktif' => true,
+            'created_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.petugas')
+            ->with('success', 'Petugas berhasil ditambahkan!');
+    }
 
     // Form edit petugas
     public function editPetugas($id)
@@ -178,16 +179,16 @@ class AdminController extends Controller
         $petugas = User::findOrFail($id);
 
         $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email,' . $petugas->id,
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email,' . $petugas->id,
             'password' => 'nullable|min:6',
-            'role'     => 'required|in:loket,tubing_mini,tubing_dewasa,kolam,kuliner',
+            'role' => 'required|in:loket,tubing_mini,tubing_dewasa,kolam,kuliner',
         ]);
 
         $data = [
-            'name'  => $request->name,
+            'name' => $request->name,
             'email' => $request->email,
-            'role'  => $request->role,
+            'role' => $request->role,
         ];
 
         if ($request->filled('password')) {
@@ -197,7 +198,7 @@ class AdminController extends Controller
         $petugas->update($data);
 
         return redirect()->route('admin.petugas')
-                        ->with('success', 'Data petugas berhasil diperbarui!');
+            ->with('success', 'Data petugas berhasil diperbarui!');
     }
 
     // Nonaktifkan akun petugas
@@ -207,7 +208,7 @@ class AdminController extends Controller
         $petugas->update(['aktif' => false]);
 
         return redirect()->route('admin.petugas')
-                         ->with('success', 'Akun petugas berhasil dinonaktifkan!');
+            ->with('success', 'Akun petugas berhasil dinonaktifkan!');
     }
 
     // Aktifkan kembali akun petugas
@@ -217,7 +218,7 @@ class AdminController extends Controller
         $petugas->update(['aktif' => true]);
 
         return redirect()->route('admin.petugas')
-                         ->with('success', 'Akun petugas berhasil diaktifkan!');
+            ->with('success', 'Akun petugas berhasil diaktifkan!');
     }
 
     // Halaman kelola paket tubing
@@ -238,15 +239,15 @@ class AdminController extends Controller
     {
         $request->validate([
             'nama_paket' => 'required|string|max:100',
-            'jenis'      => 'required|in:mini,dewasa',
-            'fasilitas'  => 'required|string',
-            'harga'      => 'required|integer|min:0',
+            'jenis' => 'required|in:mini,dewasa',
+            'fasilitas' => 'required|string',
+            'harga' => 'required|integer|min:0',
         ]);
 
         PaketTubing::create($request->all());
 
         return redirect()->route('admin.paket_tubing')
-                        ->with('success', 'Paket tubing berhasil ditambahkan!');
+            ->with('success', 'Paket tubing berhasil ditambahkan!');
     }
 
     // Form edit paket tubing
@@ -261,16 +262,16 @@ class AdminController extends Controller
     {
         $request->validate([
             'nama_paket' => 'required|string|max:100',
-            'jenis'      => 'required|in:mini,dewasa',
-            'fasilitas'  => 'required|string',
-            'harga'      => 'required|integer|min:0',
+            'jenis' => 'required|in:mini,dewasa',
+            'fasilitas' => 'required|string',
+            'harga' => 'required|integer|min:0',
         ]);
 
         $paket = PaketTubing::findOrFail($id);
         $paket->update($request->all());
 
         return redirect()->route('admin.paket_tubing')
-                        ->with('success', 'Paket tubing berhasil diperbarui!');
+            ->with('success', 'Paket tubing berhasil diperbarui!');
     }
 
     // Tandai paket tidak tersedia
@@ -280,7 +281,7 @@ class AdminController extends Controller
         $paket->update(['aktif' => false]);
 
         return redirect()->route('admin.paket_tubing')
-                        ->with('success', 'Paket ditandai tidak tersedia.');
+            ->with('success', 'Paket ditandai tidak tersedia.');
     }
 
     // Tandai paket tersedia kembali
@@ -290,7 +291,7 @@ class AdminController extends Controller
         $paket->update(['aktif' => true]);
 
         return redirect()->route('admin.paket_tubing')
-                        ->with('success', 'Paket ditandai tersedia kembali.');
+            ->with('success', 'Paket ditandai tersedia kembali.');
     }
 
 
@@ -312,14 +313,14 @@ class AdminController extends Controller
     {
         $request->validate([
             'nama_menu' => 'required|string|max:100',
-            'harga'     => 'required|integer|min:0',
-            'kategori'  => 'required|in:makanan,minuman,snack',
+            'harga' => 'required|integer|min:0',
+            'kategori' => 'required|in:makanan,minuman,snack',
         ]);
 
         MenuKuliner::create($request->all());
 
         return redirect()->route('admin.menu_kuliner')
-                        ->with('success', 'Menu berhasil ditambahkan!');
+            ->with('success', 'Menu berhasil ditambahkan!');
     }
 
     // Form edit menu kuliner
@@ -334,15 +335,15 @@ class AdminController extends Controller
     {
         $request->validate([
             'nama_menu' => 'required|string|max:100',
-            'harga'     => 'required|integer|min:0',
-            'kategori'  => 'required|in:makanan,minuman,snack',
+            'harga' => 'required|integer|min:0',
+            'kategori' => 'required|in:makanan,minuman,snack',
         ]);
 
         $menu = MenuKuliner::findOrFail($id);
         $menu->update($request->all());
 
         return redirect()->route('admin.menu_kuliner')
-                        ->with('success', 'Menu berhasil diperbarui!');
+            ->with('success', 'Menu berhasil diperbarui!');
     }
 
     // Tandai menu tidak tersedia
@@ -352,7 +353,7 @@ class AdminController extends Controller
         $menu->update(['tersedia' => false]);
 
         return redirect()->route('admin.menu_kuliner')
-                        ->with('success', 'Menu ditandai tidak tersedia.');
+            ->with('success', 'Menu ditandai tidak tersedia.');
     }
 
     // Tandai menu tersedia kembali
@@ -362,7 +363,7 @@ class AdminController extends Controller
         $menu->update(['tersedia' => true]);
 
         return redirect()->route('admin.menu_kuliner')
-                        ->with('success', 'Menu ditandai tersedia kembali.');
+            ->with('success', 'Menu ditandai tersedia kembali.');
     }
 
     // Halaman kelola stok
@@ -377,7 +378,7 @@ class AdminController extends Controller
     {
         // Hanya tampilkan jenis yang belum punya record
         $jenisTerpakai = MasterStok::pluck('jenis')->toArray();
-        $semuaJenis = ['pelampung', 'pakan_ikan'];
+        $semuaJenis = ['pelampung', 'pakan_ikan', 'gazebo_besar', 'gazebo_kecil'];
         $jenisTersedia = array_diff($semuaJenis, $jenisTerpakai);
 
         return view('admin.stok.tambah', compact('jenisTersedia'));
@@ -387,56 +388,162 @@ class AdminController extends Controller
     public function simpanStok(Request $request)
     {
         $request->validate([
-            'jenis'        => 'required|in:pelampung,pakan_ikan|unique:master_stok,jenis',
-            'total_stok'   => 'required|integer|min:0',
+            'jenis' => 'required|in:pelampung,pakan_ikan,gazebo_besar,gazebo_kecil|unique:master_stok,jenis',
+            'total_stok' => 'required|integer|min:0',
             'harga_satuan' => 'required|integer|min:0',
         ]);
 
         MasterStok::create([
-            'jenis'        => $request->jenis,
-            'total_stok'   => $request->total_stok,
-            'tersedia'     => $request->total_stok,
+            'jenis' => $request->jenis,
+            'total_stok' => $request->total_stok,
+            'tersedia' => $request->total_stok,
             'harga_satuan' => $request->harga_satuan,
         ]);
 
         return redirect()->route('admin.stok')
-                        ->with('success', 'Stok baru berhasil ditambahkan!');
+            ->with('success', 'Stok baru berhasil ditambahkan!');
     }
 
     // Update stok
     public function updateStok(Request $request, $id)
     {
         $request->validate([
-            'total_stok'   => 'required|integer|min:0',
+            'total_stok' => 'required|integer|min:0',
             'harga_satuan' => 'required|integer|min:0',
         ]);
 
         $stok = MasterStok::findOrFail($id);
         $selisih = $request->total_stok - $stok->total_stok;
         $stok->update([
-            'total_stok'   => $request->total_stok,
-            'tersedia'     => $stok->tersedia + $selisih,
+            'total_stok' => $request->total_stok,
+            'tersedia' => $stok->tersedia + $selisih,
             'harga_satuan' => $request->harga_satuan,
         ]);
 
         return redirect()->route('admin.stok')
-                        ->with('success', 'Stok berhasil diperbarui!');
+            ->with('success', 'Stok berhasil diperbarui!');
     }
 
+    public function gazebo()
+    {
+        $stokGazeboBesar = MasterStok::where('jenis', 'gazebo_besar')->first();
+        $stokGazeboKecil = MasterStok::where('jenis', 'gazebo_kecil')->first();
+
+        $nomorBesarTersedia = $this->nomorGazeboTersedia('besar', $stokGazeboBesar->total_stok ?? 0);
+        $nomorKecilTersedia = $this->nomorGazeboTersedia('kecil', $stokGazeboKecil->total_stok ?? 0);
+
+        $riwayatGazebo = SewaGazebo::where('user_id', auth()->id())
+            ->where('titik_jual', 'admin')
+            ->whereDate('created_at', today())
+            ->latest()
+            ->get();
+
+        $gazeboDisewa = SewaGazebo::with('petugas')
+            ->where('status', 'disewa')
+            ->latest()
+            ->get();
+
+        $totalHariIni = $riwayatGazebo->sum('total_bayar');
+
+        return view('admin.gazebo', [
+            'stokGazeboBesar' => $stokGazeboBesar,
+            'stokGazeboKecil' => $stokGazeboKecil,
+            'nomorBesarTersedia' => $nomorBesarTersedia,
+            'nomorKecilTersedia' => $nomorKecilTersedia,
+            'riwayatGazebo' => $riwayatGazebo,
+            'gazeboDisewa' => $gazeboDisewa,
+            'totalHariIni' => $totalHariIni,
+        ]);
+    }
+
+    public function simpanGazebo(Request $request)
+    {
+        $request->validate([
+            'jenis_gazebo' => 'required|in:besar,kecil',
+            'jumlah' => 'required|integer|min:1',
+            'nomor_gazebo' => 'required|array|min:1',
+            'nomor_gazebo.*' => 'integer',
+            'catatan' => 'nullable|string|max:100',
+        ]);
+
+        if (count($request->nomor_gazebo) != $request->jumlah) {
+            return redirect()->route('admin.gazebo')
+                ->with('error', 'Jumlah nomor gazebo yang dipilih harus sama dengan jumlah gazebo (' . $request->jumlah . ').');
+        }
+
+        $jenisStok = 'gazebo_' . $request->jenis_gazebo;
+        $stok = MasterStok::where('jenis', $jenisStok)->first();
+
+        if (!$stok || $stok->tersedia < $request->jumlah) {
+            return redirect()->route('admin.gazebo')
+                ->with('error', 'Stok gazebo ' . $request->jenis_gazebo . ' tidak cukup. Tersedia: ' . ($stok->tersedia ?? 0) . '.');
+        }
+
+        // Cegah nomor yang sudah dipinjam dipilih ulang (race condition sederhana)
+        $nomorTersedia = $this->nomorGazeboTersedia($request->jenis_gazebo, $stok->total_stok);
+        $nomorTidakValid = array_diff($request->nomor_gazebo, $nomorTersedia);
+
+        if (count($nomorTidakValid) > 0) {
+            return redirect()->route('admin.gazebo')
+                ->with('error', 'Nomor gazebo ' . implode(', ', $nomorTidakValid) . ' sudah dipinjam. Silakan pilih nomor lain.');
+        }
+
+        $stok->decrement('tersedia', $request->jumlah);
+
+        $catatanNomor = 'No. ' . implode(', ', $request->nomor_gazebo);
+        $catatanFinal = $catatanNomor . ($request->catatan ? ' | ' . $request->catatan : '');
+
+        SewaGazebo::create([
+            'user_id' => auth()->id(),
+            'titik_jual' => 'admin',
+            'jenis_gazebo' => $request->jenis_gazebo,
+            'jumlah' => $request->jumlah,
+            'catatan' => $catatanFinal,
+            'harga_satuan' => $stok->harga_satuan,
+            'total_bayar' => $stok->harga_satuan * $request->jumlah,
+            'status' => 'disewa',
+        ]);
+
+        return redirect()->route('admin.gazebo')
+            ->with('success', 'Sewa gazebo berhasil disimpan!');
+    }
+    public function tandaiKembaliGazebo($id)
+    {
+        $sewa = SewaGazebo::findOrFail($id);
+
+        if ($sewa->status === 'kembali') {
+            return redirect()->back()
+                ->with('error', 'Gazebo ini sudah ditandai kembali sebelumnya.');
+        }
+
+        $sewa->update([
+            'status' => 'kembali',
+            'waktu_kembali' => now(),
+        ]);
+
+        $jenisStok = 'gazebo_' . $sewa->jenis_gazebo;
+        $stok = MasterStok::where('jenis', $jenisStok)->first();
+        if ($stok) {
+            $stok->increment('tersedia', $sewa->jumlah);
+        }
+
+        return redirect()->back()
+            ->with('success', 'Gazebo berhasil ditandai kembali.');
+    }
     public function laporan(Request $request)
     {
         $filterKategori = $request->get('kategori', 'semua');
-        $filterTipe     = $request->get('tipe', 'hari'); // 'hari' atau 'bulan'
-        $filterTanggal  = $request->get('tanggal', today()->toDateString());
-        $filterBulan    = $request->get('bulan', now()->format('Y-m'));
+        $filterTipe = $request->get('tipe', 'hari'); // 'hari' atau 'bulan'
+        $filterTanggal = $request->get('tanggal', today()->toDateString());
+        $filterBulan = $request->get('bulan', now()->format('Y-m'));
 
         // Tentukan rentang tanggal berdasarkan filter
         if ($filterTipe === 'bulan') {
-            $dari   = \Carbon\Carbon::parse($filterBulan . '-01')->startOfMonth();
+            $dari = \Carbon\Carbon::parse($filterBulan . '-01')->startOfMonth();
             $sampai = \Carbon\Carbon::parse($filterBulan . '-01')->endOfMonth();
             $labelPeriode = 'Bulan ' . \Carbon\Carbon::parse($filterBulan)->translatedFormat('F Y');
         } else {
-            $dari   = \Carbon\Carbon::parse($filterTanggal)->startOfDay();
+            $dari = \Carbon\Carbon::parse($filterTanggal)->startOfDay();
             $sampai = \Carbon\Carbon::parse($filterTanggal)->endOfDay();
             $labelPeriode = \Carbon\Carbon::parse($filterTanggal)->translatedFormat('l, d F Y');
         }
@@ -450,10 +557,10 @@ class AdminController extends Controller
                 ->latest()->get();
 
             $data['tiket_masuk'] = [
-                'label'    => '🎫 Tiket Masuk',
-                'total'    => $tiket->sum('total_bayar'),
-                'kolom'    => ['Waktu', 'Petugas', 'Jenis Kendaraan', 'Jumlah', 'Harga Satuan', 'Total'],
-                'baris'    => $tiket->map(fn($t) => [
+                'label' => '🎫 Tiket Masuk',
+                'total' => $tiket->sum('total_bayar'),
+                'kolom' => ['Waktu', 'Petugas', 'Jenis Kendaraan', 'Jumlah', 'Harga Satuan', 'Total'],
+                'baris' => $tiket->map(fn($t) => [
                     $t->created_at->format('d/m H:i'),
                     $t->petugas->name ?? '-',
                     ucfirst($t->jenis_kendaraan),
@@ -471,10 +578,10 @@ class AdminController extends Controller
                 ->latest()->get();
 
             $data['tubing'] = [
-                'label'    => '🚣 Tubing',
-                'total'    => $tubing->sum('total_bayar'),
-                'kolom'    => ['Waktu', 'Petugas', 'Paket', 'Peserta', 'Total'],
-                'baris'    => $tubing->map(fn($t) => [
+                'label' => '🚣 Tubing',
+                'total' => $tubing->sum('total_bayar'),
+                'kolom' => ['Waktu', 'Petugas', 'Paket', 'Peserta', 'Total'],
+                'baris' => $tubing->map(fn($t) => [
                     $t->created_at->format('d/m H:i'),
                     $t->petugas->name ?? '-',
                     $t->paket->nama_paket ?? '-',
@@ -573,6 +680,25 @@ class AdminController extends Controller
             'filterBulan',
             'labelPeriode'
         ));
+    }
+
+    private function nomorGazeboTersedia(string $jenisGazebo, int $totalStok): array
+    {
+        $semuaNomor = range(1, max($totalStok, 0));
+
+        $nomorDipinjam = SewaGazebo::where('jenis_gazebo', $jenisGazebo)
+            ->where('status', 'disewa')
+            ->pluck('catatan')
+            ->flatMap(function ($catatan) {
+                if ($catatan && preg_match('/No\.\s*([\d,\s]+)/', $catatan, $match)) {
+                    return array_map('trim', explode(',', $match[1]));
+                }
+                return [];
+            })
+            ->map(fn($n) => (int) $n)
+            ->toArray();
+
+        return array_values(array_diff($semuaNomor, $nomorDipinjam));
     }
 
 }

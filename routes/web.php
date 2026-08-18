@@ -60,6 +60,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/stok/simpan', [AdminController::class, 'simpanStok'])->name('stok.simpan');
     Route::patch('/stok/{id}', [AdminController::class, 'updateStok'])->name('stok.update');
 
+    //gazebo
+    Route::get('/gazebo', [AdminController::class, 'gazebo'])->name('gazebo');
+    Route::post('/gazebo/simpan', [AdminController::class, 'simpanGazebo'])->name('gazebo.simpan');
+    Route::patch('/gazebo/{id}/kembali', [AdminController::class, 'tandaiKembaliGazebo'])->name('gazebo.kembali');
+
     // Laporan
     Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan');
 });
@@ -71,6 +76,10 @@ Route::middleware(['auth', 'role:loket'])->prefix('loket')->name('loket.')->grou
 
     Route::get('/pakan-ikan', [LoketController::class, 'pakanIkan'])->name('pakan_ikan');
     Route::post('/pakan-ikan/simpan', [LoketController::class, 'simpanPakanIkan'])->name('pakan_ikan.simpan');
+
+    Route::get('/gazebo', [LoketController::class, 'gazebo'])->name('gazebo');
+    Route::post('/gazebo/simpan', [LoketController::class, 'simpanGazebo'])->name('gazebo.simpan');
+    Route::patch('/gazebo/{id}/kembali', [LoketController::class, 'tandaiKembaliGazebo'])->name('gazebo.kembali');
 });
 
 // Routes Tubing (mini & dewasa)
@@ -107,6 +116,9 @@ Route::middleware(['auth', 'role:kolam'])->prefix('kolam')->name('kolam.')->grou
 
     Route::get('/pakan-ikan', [KolamController::class, 'pakanIkan'])->name('pakan_ikan');
     Route::post('/pakan-ikan/simpan', [KolamController::class, 'simpanPakanIkan'])->name('pakan_ikan.simpan');
+
+    Route::get('/ikan-hias', [KolamController::class, 'ikanHias'])->name('ikan_hias');
+    Route::post('/ikan-hias/simpan', [KolamController::class, 'simpanIkanHias'])->name('ikan_hias.simpan');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

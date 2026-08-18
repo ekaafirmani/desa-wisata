@@ -1,13 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\IkanHiasPenjualan;
+use App\Services\IkanHiasService;
 use App\Models\TiketKolam;
 use App\Models\SewaPelampung;
 use App\Models\MasterStok;
 use App\Models\PakanIkan;
 use App\Services\PakanIkanService;
 use Illuminate\Http\Request;
+
 
 class KolamController extends Controller
 {
@@ -172,4 +174,35 @@ class KolamController extends Controller
         return redirect()->route('kolam.pakan_ikan')
                          ->with($hasil['success'] ? 'success' : 'error', $hasil['message']);
     }
+
+    public function ikanHias()
+{
+    $totalHariIni = IkanHiasPenjualan::whereDate('created_at', today())->sum('total_bayar');
+
+    $riwayatIkanHias = IkanHiasPenjualan::where('user_id', auth()->id())
+        ->whereDate('created_at', today())
+        ->orderByDesc('created_at')
+        ->get();
+
+    return view('kolam.ikan_hias', compact('totalHariIni', 'riwayatIkanHias'));
+}
+
+public function simpanIkanHias(Request $request)
+{
+    $request->validate([
+        'jumlah_ikan' => 'required|integer|min:1',
+    ]);
+
+    $hargaSatuan = IkanHiasService::HARGA_PER_EKOR;
+    $totalBayar = $request->jumlah_ikan * $hargaSatuan;
+
+    IkanHiasPenjualan::create([
+        'user_id'      => auth()->id(),
+        'jumlah_ikan'  => $request->jumlah_ikan,
+        'harga_satuan' => $hargaSatuan,
+        'total_bayar'  => $totalBayar,
+    ]);
+
+    return redirect()->route('kolam.ikan_hias')->with('success', 'Penjualan ikan hias berhasil disimpan!');
+}
 }
