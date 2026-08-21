@@ -15,15 +15,32 @@ use App\Models\MasterStok;
 use App\Models\SewaGazebo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\IkanHiasPenjualan;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\LaporanExport;
 
 class AdminController extends Controller
 {
     // Halaman dashboard utama admin
     public function dashboard()
     {
-        // === Kartu ringkasan HARI INI ===
         $today = today();
+        $awalBulan = now()->startOfMonth();
+        $akhirBulan = now()->endOfMonth();
 
+        // Label & ikon kategori (dipakai bareng untuk Hari Ini & Bulan Ini)
+        $kategoriLabel = [
+            'tiket_masuk' => ['icon' => '🎫', 'label' => 'Tiket Masuk'],
+            'tubing' => ['icon' => '🚣', 'label' => 'Tubing'],
+            'kolam' => ['icon' => '🏊', 'label' => 'Kolam'],
+            'kuliner' => ['icon' => '🍽️', 'label' => 'Kuliner'],
+            'pakan_ikan' => ['icon' => '🐟', 'label' => 'Pakan Ikan'],
+            'gazebo' => ['icon' => '🏠', 'label' => 'Gazebo'],
+            'ikan_hias' => ['icon' => '🐠', 'label' => 'Ikan Hias'],
+        ];
+
+        // === Pendapatan HARI INI per kategori ===
         $pendapatanHariIni = [
             'tiket_masuk' => TiketMasuk::whereDate('created_at', $today)->sum('total_bayar'),
             'tubing' => TransaksiTubing::whereDate('created_at', $today)->sum('total_bayar'),
@@ -31,9 +48,23 @@ class AdminController extends Controller
                 SewaPelampung::whereDate('created_at', $today)->sum('total_bayar'),
             'kuliner' => TransaksiKuliner::whereDate('created_at', $today)->sum('total_bayar'),
             'pakan_ikan' => PakanIkan::whereDate('created_at', $today)->sum('total_bayar'),
+            'gazebo' => SewaGazebo::whereDate('created_at', $today)->sum('total_bayar'),
+            'ikan_hias' => IkanHiasPenjualan::whereDate('created_at', $today)->sum('total_bayar'),
         ];
-
         $totalHariIni = array_sum($pendapatanHariIni);
+
+        // === Pendapatan BULAN INI per kategori ===
+        $pendapatanBulanIni = [
+            'tiket_masuk' => TiketMasuk::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+            'tubing' => TransaksiTubing::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+            'kolam' => TiketKolam::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar') +
+                SewaPelampung::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+            'kuliner' => TransaksiKuliner::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+            'pakan_ikan' => PakanIkan::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+            'gazebo' => SewaGazebo::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+            'ikan_hias' => IkanHiasPenjualan::whereBetween('created_at', [$awalBulan, $akhirBulan])->sum('total_bayar'),
+        ];
+        $totalBulanIni = array_sum($pendapatanBulanIni);
 
         // === Total petugas aktif ===
         $totalPetugas = User::where('role', '!=', 'admin')
@@ -101,11 +132,32 @@ class AdminController extends Controller
                 ])
         );
 
-        // Urutkan berdasarkan waktu terbaru, ambil 10
+        $aktivitasTerkini = $aktivitasTerkini->merge(
+            SewaGazebo::whereDate('created_at', $today)
+                ->latest()->limit(5)
+                ->get()->map(fn($t) => [
+                    'waktu' => $t->created_at->format('H:i'),
+                    'kategori' => 'Gazebo',
+                    'detail' => 'Gazebo ' . ucfirst($t->jenis_gazebo) . ' x' . $t->jumlah . ' (' . $t->titik_jual . ')',
+                    'total' => $t->total_bayar,
+                ])
+        );
+
+        $aktivitasTerkini = $aktivitasTerkini->merge(
+            IkanHiasPenjualan::whereDate('created_at', $today)
+                ->latest()->limit(5)
+                ->get()->map(fn($t) => [
+                    'waktu' => $t->created_at->format('H:i'),
+                    'kategori' => 'Ikan Hias',
+                    'detail' => $t->jumlah_ikan . ' ekor',
+                    'total' => $t->total_bayar,
+                ])
+        );
+
         $aktivitasTerkini = $aktivitasTerkini->sortByDesc('waktu')->take(10)->values();
 
-        // === Data grafik 30 hari terakhir ===
-        $grafikData = [];
+        // === Data grafik HARIAN (30 hari terakhir) ===
+        $grafikHarian = [];
         for ($i = 29; $i >= 0; $i--) {
             $tanggal = now()->subDays($i)->toDateString();
             $label = now()->subDays($i)->format('d M');
@@ -115,18 +167,43 @@ class AdminController extends Controller
                 + TiketKolam::whereDate('created_at', $tanggal)->sum('total_bayar')
                 + SewaPelampung::whereDate('created_at', $tanggal)->sum('total_bayar')
                 + TransaksiKuliner::whereDate('created_at', $tanggal)->sum('total_bayar')
-                + PakanIkan::whereDate('created_at', $tanggal)->sum('total_bayar');
+                + PakanIkan::whereDate('created_at', $tanggal)->sum('total_bayar')
+                + SewaGazebo::whereDate('created_at', $tanggal)->sum('total_bayar')
+                + IkanHiasPenjualan::whereDate('created_at', $tanggal)->sum('total_bayar');
 
-            $grafikData[] = ['label' => $label, 'total' => $total];
+            $grafikHarian[] = ['label' => $label, 'total' => $total];
+        }
+
+        // === Data grafik BULANAN (12 bulan terakhir) ===
+        $grafikBulanan = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $bulanAwal = now()->subMonths($i)->startOfMonth();
+            $bulanAkhir = now()->subMonths($i)->endOfMonth();
+            $label = now()->subMonths($i)->translatedFormat('M Y');
+
+            $total = TiketMasuk::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + TransaksiTubing::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + TiketKolam::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + SewaPelampung::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + TransaksiKuliner::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + PakanIkan::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + SewaGazebo::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar')
+                + IkanHiasPenjualan::whereBetween('created_at', [$bulanAwal, $bulanAkhir])->sum('total_bayar');
+
+            $grafikBulanan[] = ['label' => $label, 'total' => $total];
         }
 
         return view('admin.dashboard', compact(
+            'kategoriLabel',
             'pendapatanHariIni',
             'totalHariIni',
+            'pendapatanBulanIni',
+            'totalBulanIni',
             'totalPetugas',
             'stokHampirHabis',
             'aktivitasTerkini',
-            'grafikData'
+            'grafikHarian',
+            'grafikBulanan'
         ));
     }
 
@@ -530,14 +607,14 @@ class AdminController extends Controller
         return redirect()->back()
             ->with('success', 'Gazebo berhasil ditandai kembali.');
     }
-    public function laporan(Request $request)
+    // Kumpulkan data laporan (dipakai bareng oleh web, PDF, Excel)
+    private function generateLaporanData(Request $request): array
     {
         $filterKategori = $request->get('kategori', 'semua');
-        $filterTipe = $request->get('tipe', 'hari'); // 'hari' atau 'bulan'
+        $filterTipe = $request->get('tipe', 'hari');
         $filterTanggal = $request->get('tanggal', today()->toDateString());
         $filterBulan = $request->get('bulan', now()->format('Y-m'));
 
-        // Tentukan rentang tanggal berdasarkan filter
         if ($filterTipe === 'bulan') {
             $dari = \Carbon\Carbon::parse($filterBulan . '-01')->startOfMonth();
             $sampai = \Carbon\Carbon::parse($filterBulan . '-01')->endOfMonth();
@@ -550,7 +627,6 @@ class AdminController extends Controller
 
         $data = [];
 
-        // Tiket Masuk
         if (in_array($filterKategori, ['semua', 'tiket_masuk'])) {
             $tiket = TiketMasuk::with('petugas')
                 ->whereBetween('created_at', [$dari, $sampai])
@@ -558,6 +634,7 @@ class AdminController extends Controller
 
             $data['tiket_masuk'] = [
                 'label' => '🎫 Tiket Masuk',
+                'label_bersih' => 'Tiket Masuk',
                 'total' => $tiket->sum('total_bayar'),
                 'kolom' => ['Waktu', 'Petugas', 'Jenis Kendaraan', 'Jumlah', 'Harga Satuan', 'Total'],
                 'baris' => $tiket->map(fn($t) => [
@@ -571,7 +648,6 @@ class AdminController extends Controller
             ];
         }
 
-        // Tubing
         if (in_array($filterKategori, ['semua', 'tubing'])) {
             $tubing = TransaksiTubing::with('petugas', 'paket')
                 ->whereBetween('created_at', [$dari, $sampai])
@@ -579,6 +655,7 @@ class AdminController extends Controller
 
             $data['tubing'] = [
                 'label' => '🚣 Tubing',
+                'label_bersih' => 'Tubing',
                 'total' => $tubing->sum('total_bayar'),
                 'kolom' => ['Waktu', 'Petugas', 'Paket', 'Peserta', 'Total'],
                 'baris' => $tubing->map(fn($t) => [
@@ -591,7 +668,6 @@ class AdminController extends Controller
             ];
         }
 
-        // Kolam (tiket + sewa pelampung)
         if (in_array($filterKategori, ['semua', 'kolam'])) {
             $tiketKolam = TiketKolam::with('petugas')
                 ->whereBetween('created_at', [$dari, $sampai])
@@ -623,13 +699,13 @@ class AdminController extends Controller
 
             $data['kolam'] = [
                 'label' => '🏊 Kolam',
+                'label_bersih' => 'Kolam',
                 'total' => $totalKolam,
                 'kolom' => ['Waktu', 'Petugas', 'Jenis', 'Jumlah', 'Harga Satuan', 'Total'],
                 'baris' => $barisKolam->sortByDesc(fn($b) => $b[0])->values(),
             ];
         }
 
-        // Kuliner
         if (in_array($filterKategori, ['semua', 'kuliner'])) {
             $kuliner = TransaksiKuliner::with('petugas', 'detail.menu')
                 ->whereBetween('created_at', [$dari, $sampai])
@@ -637,6 +713,7 @@ class AdminController extends Controller
 
             $data['kuliner'] = [
                 'label' => '🍽️ Kuliner',
+                'label_bersih' => 'Kuliner',
                 'total' => $kuliner->sum('total_bayar'),
                 'kolom' => ['Waktu', 'Petugas', 'Item', 'Total'],
                 'baris' => $kuliner->map(fn($t) => [
@@ -648,7 +725,6 @@ class AdminController extends Controller
             ];
         }
 
-        // Pakan Ikan
         if (in_array($filterKategori, ['semua', 'pakan_ikan'])) {
             $pakanIkan = PakanIkan::with('petugas')
                 ->whereBetween('created_at', [$dari, $sampai])
@@ -656,6 +732,7 @@ class AdminController extends Controller
 
             $data['pakan_ikan'] = [
                 'label' => '🐟 Pakan Ikan',
+                'label_bersih' => 'Pakan Ikan',
                 'total' => $pakanIkan->sum('total_bayar'),
                 'kolom' => ['Waktu', 'Petugas', 'Titik Jual', 'Porsi', 'Harga Satuan', 'Total'],
                 'baris' => $pakanIkan->map(fn($t) => [
@@ -668,18 +745,87 @@ class AdminController extends Controller
                 ]),
             ];
         }
+        if (in_array($filterKategori, ['semua', 'gazebo'])) {
+            $gazebo = SewaGazebo::with('petugas')
+                ->whereBetween('created_at', [$dari, $sampai])
+                ->latest()->get();
+
+            $data['gazebo'] = [
+                'label' => '🏠 Gazebo',
+                'label_bersih' => 'Gazebo',
+                'total' => $gazebo->sum('total_bayar'),
+                'kolom' => ['Waktu', 'Petugas', 'Titik Jual', 'Jenis', 'Jumlah', 'Harga Satuan', 'Total'],
+                'baris' => $gazebo->map(fn($t) => [
+                    $t->created_at->format('d/m H:i'),
+                    $t->petugas->name ?? '-',
+                    ucfirst($t->titik_jual),
+                    'Gazebo ' . ucfirst($t->jenis_gazebo),
+                    $t->jumlah,
+                    'Rp ' . number_format($t->harga_satuan, 0, ',', '.'),
+                    'Rp ' . number_format($t->total_bayar, 0, ',', '.'),
+                ]),
+            ];
+        }
+
+        if (in_array($filterKategori, ['semua', 'ikan_hias'])) {
+            $ikanHias = IkanHiasPenjualan::with('user')
+                ->whereBetween('created_at', [$dari, $sampai])
+                ->latest()->get();
+
+            $data['ikan_hias'] = [
+                'label' => '🐠 Ikan Hias',
+                'label_bersih' => 'Ikan Hias',
+                'total' => $ikanHias->sum('total_bayar'),
+                'kolom' => ['Waktu', 'Petugas', 'Jumlah', 'Harga Satuan', 'Total'],
+                'baris' => $ikanHias->map(fn($t) => [
+                    $t->created_at->format('d/m H:i'),
+                    $t->user->name ?? '-',
+                    $t->jumlah_ikan . ' ekor',
+                    'Rp ' . number_format($t->harga_satuan, 0, ',', '.'),
+                    'Rp ' . number_format($t->total_bayar, 0, ',', '.'),
+                ]),
+            ];
+        }
 
         $grandTotal = collect($data)->sum('total');
 
-        return view('admin.laporan', compact(
-            'data',
-            'grandTotal',
-            'filterKategori',
-            'filterTipe',
-            'filterTanggal',
-            'filterBulan',
-            'labelPeriode'
-        ));
+        return [
+            'data' => $data,
+            'grandTotal' => $grandTotal,
+            'filterKategori' => $filterKategori,
+            'filterTipe' => $filterTipe,
+            'filterTanggal' => $filterTanggal,
+            'filterBulan' => $filterBulan,
+            'labelPeriode' => $labelPeriode,
+        ];
+    }
+
+    // Halaman web laporan
+    public function laporan(Request $request)
+    {
+        return view('admin.laporan', $this->generateLaporanData($request));
+    }
+
+    // Export PDF
+    public function laporanPdf(Request $request)
+    {
+        $data = $this->generateLaporanData($request);
+
+        $pdf = Pdf::loadView('admin.laporan_pdf', $data)->setPaper('a4', 'portrait');
+
+        $namaFile = 'laporan-pendapatan-' . \Illuminate\Support\Str::slug($data['labelPeriode']) . '.pdf';
+
+        return $pdf->download($namaFile);
+    }
+
+    // Export Excel
+    public function laporanExcel(Request $request)
+    {
+        $data = $this->generateLaporanData($request);
+
+        $namaFile = 'laporan-pendapatan-' . \Illuminate\Support\Str::slug($data['labelPeriode']) . '.xlsx';
+
+        return Excel::download(new LaporanExport($data), $namaFile);
     }
 
     private function nomorGazeboTersedia(string $jenisGazebo, int $totalStok): array

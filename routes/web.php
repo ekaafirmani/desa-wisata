@@ -67,6 +67,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Laporan
     Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan');
+    Route::get('/laporan/pdf', [AdminController::class, 'laporanPdf'])->name('laporan.pdf');
+    Route::get('/laporan/excel', [AdminController::class, 'laporanExcel'])->name('laporan.excel');
 });
 
 // Routes Loket

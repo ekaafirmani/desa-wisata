@@ -7,10 +7,16 @@
     {{-- Header (disembunyikan saat print) --}}
     <div class="flex items-center justify-between mb-6 print:hidden">
         <h2 class="text-2xl font-bold text-gray-800">Laporan Pendapatan</h2>
-        <button onclick="window.print()"
-                class="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            🖨️ Print / Simpan PDF
-        </button>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.laporan.pdf', request()->query()) }}"
+                class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                📄 Simpan PDF
+            </a>
+            <a href="{{ route('admin.laporan.excel', request()->query()) }}"
+                class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                📊 Simpan Excel
+            </a>
+        </div>
     </div>
 
     {{-- Form filter (disembunyikan saat print) --}}
@@ -21,8 +27,8 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Periode</label>
                 <select name="tipe" onchange="this.form.submit()"
-                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
-                    <option value="hari"  {{ $filterTipe == 'hari'  ? 'selected' : '' }}>Per Hari</option>
+                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                    <option value="hari" {{ $filterTipe == 'hari' ? 'selected' : '' }}>Per Hari</option>
                     <option value="bulan" {{ $filterTipe == 'bulan' ? 'selected' : '' }}>Per Bulan</option>
                 </select>
             </div>
@@ -32,13 +38,13 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Bulan</label>
                     <input type="month" name="bulan" value="{{ $filterBulan }}"
-                           class="min-w-[160px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                        class="min-w-[160px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
                 </div>
             @else
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal</label>
                     <input type="date" name="tanggal" value="{{ $filterTanggal }}"
-                           class="min-w-[160px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                        class="min-w-[160px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
                 </div>
             @endif
 
@@ -46,18 +52,20 @@
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Kategori</label>
                 <select name="kategori"
-                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
-                    <option value="semua"      {{ $filterKategori == 'semua'      ? 'selected' : '' }}>Semua Kategori</option>
+                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                    <option value="semua" {{ $filterKategori == 'semua' ? 'selected' : '' }}>Semua Kategori</option>
                     <option value="tiket_masuk" {{ $filterKategori == 'tiket_masuk' ? 'selected' : '' }}>Tiket Masuk</option>
-                    <option value="tubing"     {{ $filterKategori == 'tubing'     ? 'selected' : '' }}>Tubing</option>
-                    <option value="kolam"      {{ $filterKategori == 'kolam'      ? 'selected' : '' }}>Kolam</option>
-                    <option value="kuliner"    {{ $filterKategori == 'kuliner'    ? 'selected' : '' }}>Kuliner</option>
+                    <option value="tubing" {{ $filterKategori == 'tubing' ? 'selected' : '' }}>Tubing</option>
+                    <option value="kolam" {{ $filterKategori == 'kolam' ? 'selected' : '' }}>Kolam</option>
+                    <option value="kuliner" {{ $filterKategori == 'kuliner' ? 'selected' : '' }}>Kuliner</option>
                     <option value="pakan_ikan" {{ $filterKategori == 'pakan_ikan' ? 'selected' : '' }}>Pakan Ikan</option>
+                    <option value="gazebo" {{ $filterKategori == 'gazebo' ? 'selected' : '' }}>Gazebo</option>
+                    <option value="ikan_hias" {{ $filterKategori == 'ikan_hias' ? 'selected' : '' }}>Ikan Hias</option>
                 </select>
             </div>
 
             <button type="submit"
-                    class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium">
                 Tampilkan
             </button>
         </form>
@@ -71,14 +79,16 @@
     </div>
 
     {{-- Ringkasan grand total --}}
-    <div class="bg-green-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
+    <div
+        class="bg-green-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
         <p class="text-green-200 text-sm print:text-gray-500">Total Pendapatan — {{ $labelPeriode }}</p>
         <p class="text-3xl font-bold mt-1">Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
     </div>
 
     {{-- Tabel per kategori --}}
     @forelse ($data as $key => $kategori)
-        <div class="bg-white rounded-xl shadow mb-6 overflow-hidden print:shadow-none print:border print:border-gray-200 print:mb-8">
+        <div
+            class="bg-white rounded-xl shadow mb-6 overflow-hidden print:shadow-none print:border print:border-gray-200 print:mb-8">
 
             {{-- Header kategori --}}
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50 print:bg-white">
@@ -138,8 +148,12 @@
     {{-- CSS Print --}}
     <style>
         @media print {
+
             /* Sembunyikan elemen yang tidak perlu */
-            nav, aside, header, .print\:hidden {
+            nav,
+            aside,
+            header,
+            .print\:hidden {
                 display: none !important;
             }
 
