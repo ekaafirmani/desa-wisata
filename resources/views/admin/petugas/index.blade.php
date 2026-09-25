@@ -29,7 +29,17 @@
                     <tr>
                         <td class="px-6 py-4 text-sm text-gray-800">{{ $p->name }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $p->email }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600 capitalize">{{ str_replace('_', ' ', $p->role) }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {{ $p->role == 'loket' ? 'bg-blue-100 text-blue-700' : '' }}
+                                {{ $p->role == 'tubing_mini' ? 'bg-cyan-100 text-cyan-700' : '' }}
+                                {{ $p->role == 'tubing_dewasa' ? 'bg-orange-100 text-orange-700' : '' }}
+                                {{ $p->role == 'kolam' ? 'bg-teal-100 text-teal-700' : '' }}
+                                {{ $p->role == 'kuliner' ? 'bg-yellow-100 text-yellow-700' : '' }}
+                                {{ $p->role == 'paket_wisata' ? 'bg-purple-100 text-purple-700' : '' }}">
+                                {{ ucfirst(str_replace('_', ' ', $p->role)) }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 text-sm">
                             @if ($p->aktif)
                                 <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">Aktif</span>

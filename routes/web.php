@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TubingController;
 use App\Http\Controllers\KulinerController;
 use App\Http\Controllers\KolamController;
+use App\Http\Controllers\PaketWisataController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,6 +27,17 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+    //UMKM
+    Route::get('/umkm', [AdminController::class, 'umkm'])->name('umkm');
+    Route::get('/umkm/tambah', [AdminController::class, 'tambahLapak'])->name('umkm.tambah');
+    Route::post('/umkm/simpan', [AdminController::class, 'simpanLapak'])->name('umkm.simpan');
+    Route::get('/umkm/{id}/bayar', [AdminController::class, 'catatPembayaran'])->name('umkm.bayar');
+    Route::post('/umkm/{id}/bayar', [AdminController::class, 'simpanPembayaran'])->name('umkm.simpan_bayar');
+    Route::get('/umkm/{id}/riwayat', [AdminController::class, 'riwayatPembayaran'])->name('umkm.riwayat');
+    Route::patch('/umkm/{id}/nonaktifkan', [AdminController::class, 'nonaktifkanLapak'])->name('umkm.nonaktifkan');
+    Route::get('/umkm/{id}/edit', [AdminController::class, 'editLapak'])->name('umkm.edit');
+    Route::patch('/umkm/{id}/update', [AdminController::class, 'updateLapak'])->name('umkm.update');
+
     // Manajemen petugas
     Route::get('/petugas/{id}/edit', [AdminController::class, 'editPetugas'])->name('petugas.edit');
     Route::put('/petugas/{id}/update', [AdminController::class, 'updatePetugas'])->name('petugas.update');
@@ -35,7 +47,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/petugas/{id}/nonaktifkan', [AdminController::class, 'nonaktifkanPetugas'])->name('petugas.nonaktifkan');
     Route::patch('/petugas/{id}/aktifkan', [AdminController::class, 'aktifkanPetugas'])->name('petugas.aktifkan');
 
-    // Paket tubing
     // Paket tubing
     Route::get('/paket-tubing', [AdminController::class, 'paketTubing'])->name('paket_tubing');
     Route::get('/paket-tubing/tambah', [AdminController::class, 'tambahPaketTubing'])->name('paket_tubing.tambah');
@@ -60,16 +71,29 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/stok/simpan', [AdminController::class, 'simpanStok'])->name('stok.simpan');
     Route::patch('/stok/{id}', [AdminController::class, 'updateStok'])->name('stok.update');
 
-    //gazebo
-    Route::get('/gazebo', [AdminController::class, 'gazebo'])->name('gazebo');
-    Route::post('/gazebo/simpan', [AdminController::class, 'simpanGazebo'])->name('gazebo.simpan');
-    Route::patch('/gazebo/{id}/kembali', [AdminController::class, 'tandaiKembaliGazebo'])->name('gazebo.kembali');
+   // Master data gasebo
+    Route::get('/gasebo', [AdminController::class, 'gasebo'])->name('gasebo');
+    Route::get('/gasebo/tambah', [AdminController::class, 'tambahGasebo'])->name('gasebo.tambah');
+    Route::post('/gasebo/simpan', [AdminController::class, 'simpanGasebo'])->name('gasebo.simpan');
+    Route::get('/gasebo/{id}/edit', [AdminController::class, 'editGasebo'])->name('gasebo.edit');
+    Route::put('/gasebo/{id}/update', [AdminController::class, 'updateGasebo'])->name('gasebo.update');
+    Route::patch('/gasebo/{id}/nonaktifkan', [AdminController::class, 'nonaktifkanGasebo'])->name('gasebo.nonaktifkan');
+    Route::patch('/gasebo/{id}/aktifkan', [AdminController::class, 'aktifkanGasebo'])->name('gasebo.aktifkan');
 
     // Laporan
     Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan');
     Route::get('/laporan/pdf', [AdminController::class, 'laporanPdf'])->name('laporan.pdf');
     Route::get('/laporan/excel', [AdminController::class, 'laporanExcel'])->name('laporan.excel');
+
+    // Paket Wisata (Admin)
+    Route::get('/paket-wisata-tour', [AdminController::class, 'paketWisata'])->name('paket_wisata_tour');
+    Route::post('/paket-wisata-tour/simpan', [AdminController::class, 'simpanPaketWisata'])->name('paket_wisata_tour.simpan');
+    Route::get('/paket-wisata-tour/{id}/edit', [AdminController::class, 'editPaketWisata'])->name('paket_wisata_tour.edit');
+    Route::patch('/paket-wisata-tour/{id}/update', [AdminController::class, 'updatePaketWisata'])->name('paket_wisata_tour.update');
+    Route::patch('/paket-wisata/{id}/aktifkan', [AdminController::class, 'aktifkanPaketWisata'])->name('paket_wisata_tour.aktifkan');
+    Route::patch('/paket-wisata-tour/{id}/nonaktifkan', [AdminController::class, 'nonaktifkanPaketWisata'])->name('paket_wisata_tour.nonaktifkan');
 });
+
 
 // Routes Loket
 Route::middleware(['auth', 'role:loket'])->prefix('loket')->name('loket.')->group(function () {
@@ -79,15 +103,22 @@ Route::middleware(['auth', 'role:loket'])->prefix('loket')->name('loket.')->grou
     Route::get('/pakan-ikan', [LoketController::class, 'pakanIkan'])->name('pakan_ikan');
     Route::post('/pakan-ikan/simpan', [LoketController::class, 'simpanPakanIkan'])->name('pakan_ikan.simpan');
 
-    Route::get('/gazebo', [LoketController::class, 'gazebo'])->name('gazebo');
-    Route::post('/gazebo/simpan', [LoketController::class, 'simpanGazebo'])->name('gazebo.simpan');
-    Route::patch('/gazebo/{id}/kembali', [LoketController::class, 'tandaiKembaliGazebo'])->name('gazebo.kembali');
+    Route::get('/gasebo', [LoketController::class, 'gasebo'])->name('gasebo');
+    Route::post('/gasebo/simpan', [LoketController::class, 'simpanGasebo'])->name('gasebo.simpan');
+    Route::patch('/gasebo/{id}/selesai', [LoketController::class, 'selesaiGasebo'])->name('gasebo.selesai');
 });
 
 // Routes Tubing (mini & dewasa)
 Route::middleware(['auth', 'role:tubing_mini,tubing_dewasa'])->prefix('tubing')->name('tubing.')->group(function () {
     Route::get('/dashboard', [TubingController::class, 'dashboard'])->name('dashboard');
     Route::post('/simpan', [TubingController::class, 'simpan'])->name('simpan');
+});
+
+//Routes Paket Wisata
+Route::middleware(['auth', 'role:paket_wisata'])->prefix('paket-wisata')->name('paket_wisata.')->group(function () {
+    Route::get('/dashboard', [PaketWisataController::class, 'dashboard'])->name('dashboard');
+    Route::post('/simpan', [PaketWisataController::class, 'simpan'])->name('simpan');
+    Route::get('/rekap', [PaketWisataController::class, 'rekap'])->name('rekap');
 });
 
 // Routes Kuliner
@@ -105,6 +136,11 @@ Route::middleware(['auth', 'role:kuliner'])->prefix('kuliner')->name('kuliner.')
     Route::patch('/menu/{id}/aktifkan', [KulinerController::class, 'aktifkanMenu'])->name('menu.aktifkan');
     Route::get('/menu/{id}/edit', [KulinerController::class, 'editMenu'])->name('menu.edit');
     Route::put('/menu/{id}/update', [KulinerController::class, 'updateMenu'])->name('menu.update');
+
+    //Gsebo
+    Route::get('/gasebo', [KulinerController::class, 'gasebo'])->name('gasebo');
+    Route::post('/gasebo/simpan', [KulinerController::class, 'simpanGasebo'])->name('gasebo.simpan');
+    Route::patch('/gasebo/{id}/selesai', [KulinerController::class, 'selesaiGasebo'])->name('gasebo.selesai');
 });
 
 // Routes Kolam

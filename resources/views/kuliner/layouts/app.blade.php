@@ -48,6 +48,10 @@
                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-purple-700 {{ request()->routeIs('kuliner.pakan_ikan') ? 'bg-purple-700' : '' }}">
                     <span>🐟</span> Pakan Ikan
                 </a>
+                <a href="{{ route('kuliner.gasebo') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-purple-700 {{ request()->routeIs('kuliner.gasebo*') ? 'bg-purple-700' : '' }}">
+                    <span>🏠</span> Gasebo
+                </a>
             </nav>
 
             {{-- Info user & logout --}}

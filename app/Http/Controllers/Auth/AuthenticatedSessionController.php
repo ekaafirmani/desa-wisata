@@ -42,7 +42,7 @@ class AuthenticatedSessionController extends Controller
             default         => route('login'),
         };
 
-        return redirect()->intended($redirectTo);
+        return redirect($redirectTo);
     }
 
     /**

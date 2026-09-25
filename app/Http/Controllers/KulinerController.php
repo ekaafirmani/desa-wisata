@@ -6,6 +6,8 @@ use App\Models\MenuKuliner;
 use App\Models\TransaksiKuliner;
 use App\Models\DetailKuliner;
 use App\Models\MasterStok;
+use App\Models\Gasebo;
+use App\Models\SewaGasebo;
 use App\Services\PakanIkanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -177,5 +179,85 @@ class KulinerController extends Controller
 
         return redirect()->route('kuliner.menu')
                          ->with('success', 'Menu ditandai tersedia kembali.');
+    }
+
+    // Halaman sewa gasebo besar
+    public function gasebo()
+    {
+        $gaseboList = Gasebo::where('jenis', 'besar')
+                            ->where('aktif', true)
+                            ->get();
+
+        $sewaAktif = SewaGasebo::with('gasebo')
+                        ->whereHas('gasebo', fn($q) => $q->where('jenis', 'besar'))
+                        ->where('status', 'aktif')
+                        ->latest()
+                        ->get();
+
+        $riwayatHariIni = SewaGasebo::with('gasebo')
+                            ->whereHas('gasebo', fn($q) => $q->where('jenis', 'besar'))
+                            ->where('user_id', auth()->id())
+                            ->whereDate('created_at', today())
+                            ->where('status', 'selesai')
+                            ->latest()
+                            ->get();
+
+        $totalHariIni = $riwayatHariIni->sum('total_bayar');
+
+        return view('kuliner.gasebo', compact(
+            'gaseboList', 'sewaAktif', 'riwayatHariIni', 'totalHariIni'
+        ));
+    }
+
+    // Simpan transaksi sewa gasebo besar
+    public function simpanGasebo(Request $request)
+    {
+        $request->validate([
+            'gasebo_id'    => 'required|exists:gasebo,id',
+            'nama_penyewa' => 'nullable|string|max:100',
+            'durasi_jam'   => 'required|integer|min:3', // minimal 3 jam untuk gasebo besar
+        ]);
+
+        $gasebo = Gasebo::findOrFail($request->gasebo_id);
+
+        if ($gasebo->sedangDisewa()) {
+            return redirect()->route('kuliner.gasebo')
+                            ->with('error', 'Gasebo ini sedang disewa.');
+        }
+
+        $totalBayar = $gasebo->harga_per_jam * $request->durasi_jam;
+
+        SewaGasebo::create([
+            'user_id'       => auth()->id(),
+            'gasebo_id'     => $gasebo->id,
+            'nama_penyewa'  => $request->nama_penyewa,
+            'durasi_jam'    => $request->durasi_jam,
+            'harga_per_jam' => $gasebo->harga_per_jam,
+            'total_bayar'   => $totalBayar,
+            'waktu_mulai'   => now(),
+            'waktu_selesai' => now()->addHours($request->durasi_jam),
+            'status'        => 'aktif',
+            'catatan'       => $request->catatan,
+        ]);
+
+        $gasebo->update(['status' => 'disewa']);
+
+        return redirect()->route('kuliner.gasebo')
+                        ->with('success', 'Sewa gasebo berhasil dicatat!');
+    }
+
+    // Tandai sewa gasebo selesai
+    public function selesaiGasebo($id)
+    {
+        $sewa = SewaGasebo::findOrFail($id);
+        $sewa->update([
+            'status'        => 'selesai',
+            'waktu_selesai' => now(),
+        ]);
+
+        $sewa->gasebo->update(['status' => 'tersedia']);
+
+        return redirect()->route('kuliner.gasebo')
+                        ->with('success', 'Sewa gasebo berhasil diselesaikan!');
     }
 }

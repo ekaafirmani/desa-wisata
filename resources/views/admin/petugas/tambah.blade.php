@@ -58,6 +58,7 @@
                     <option value="tubing_dewasa" {{ old('role') == 'tubing_dewasa' ? 'selected' : '' }}>Tubing Dewasa</option>
                     <option value="kolam" {{ old('role') == 'kolam' ? 'selected' : '' }}>Kolam</option>
                     <option value="kuliner" {{ old('role') == 'kuliner' ? 'selected' : '' }}>Kuliner</option>
+                    <option value="paket_wisata" {{ old('role') == 'paket_wisata' ? 'selected' : '' }}>Petugas Paket Wisata</option>
                 </select>
                 @error('role')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>

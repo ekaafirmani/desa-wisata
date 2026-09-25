@@ -47,16 +47,29 @@
                 </a>
                 <a href="{{ route('admin.menu_kuliner') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.menu_kuliner*') ? 'bg-green-700' : '' }}">
-                    <span>🍽️</span> Menu Kuliner
+                    <span>🍽️</span> Warung Pokdarwis
                 </a>
+
+                <a href="{{ route('admin.gasebo') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.gasebo*') ? 'bg-green-700' : '' }}">
+                    <span>🏕️</span> Manajemen Gasebo
+                </a>
+
+                <a href="{{ route('admin.umkm') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.umkm*') ? 'bg-green-700' : '' }}">
+                    <span>🏪</span> UMKM
+                </a>
+                
+                <a href="{{ route('admin.paket_wisata_tour') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.paket_wisata_tour*') ? 'bg-green-700' : '' }}">
+                    <span>🎫</span> Paket Wisata
+                </a>
+
                 <a href="{{ route('admin.stok') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.stok*') ? 'bg-green-700' : '' }}">
                     <span>📦</span> Kelola Stok
                 </a>
-                <a href="{{ route('admin.gazebo') }}"
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-cyan-700 {{ request()->routeIs('admin.gazebo') ? 'bg-cyan-700' : '' }}">
-                    <span>🏠</span> Gazebo
-                </a>
+                
                 <a href="{{ route('admin.laporan') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.laporan') ? 'bg-green-700' : '' }}">
                     <span>📋</span> Laporan

@@ -23,27 +23,27 @@
 
     </div>
 
-    {{-- Baris 2: Rincian Pendapatan Hari Ini per kategori --}}
+    {{-- Baris 2: Rincian Pendapatan Hari Ini per kategori (10 unit layanan) --}}
     <div class="mb-6">
         <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Rincian Hari Ini</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             @foreach ($kategoriLabel as $key => $k)
                 <div class="bg-white rounded-xl shadow p-5">
                     <p class="text-gray-500 text-xs font-medium uppercase tracking-wide">{{ $k['icon'] }} {{ $k['label'] }}</p>
-                    <p class="text-lg font-bold text-gray-800 mt-1">Rp {{ number_format($pendapatanHariIni[$key], 0, ',', '.') }}</p>
+                    <p class="text-lg font-bold text-gray-800 mt-1">Rp {{ number_format($pendapatanHariIni[$key] ?? 0, 0, ',', '.') }}</p>
                 </div>
             @endforeach
         </div>
     </div>
 
-    {{-- Baris 3: Rincian Pendapatan Bulan Ini per kategori --}}
+    {{-- Baris 3: Rincian Pendapatan Bulan Ini per kategori (10 unit layanan) --}}
     <div class="mb-6">
         <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Rincian Bulan Ini</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             @foreach ($kategoriLabel as $key => $k)
                 <div class="bg-white rounded-xl shadow p-5 border border-emerald-100">
                     <p class="text-gray-500 text-xs font-medium uppercase tracking-wide">{{ $k['icon'] }} {{ $k['label'] }}</p>
-                    <p class="text-lg font-bold text-emerald-800 mt-1">Rp {{ number_format($pendapatanBulanIni[$key], 0, ',', '.') }}</p>
+                    <p class="text-lg font-bold text-emerald-800 mt-1">Rp {{ number_format($pendapatanBulanIni[$key] ?? 0, 0, ',', '.') }}</p>
                 </div>
             @endforeach
         </div>
@@ -137,12 +137,16 @@
                             <td class="px-4 py-3 text-gray-600">{{ $a['waktu'] }}</td>
                             <td class="px-4 py-3">
                                 <span class="px-2 py-0.5 text-xs font-medium rounded-full
-                                    @if($a['kategori'] == 'Tiket Masuk') bg-blue-100 text-blue-700
-                                    @elseif($a['kategori'] == 'Tubing') bg-orange-100 text-orange-700
-                                    @elseif(str_contains($a['kategori'], 'Kolam')) bg-cyan-100 text-cyan-700
-                                    @elseif($a['kategori'] == 'Kuliner') bg-purple-100 text-purple-700
-                                    @elseif($a['kategori'] == 'Gazebo') bg-amber-100 text-amber-700
+                                    @if($a['kategori'] == 'Parkir') bg-blue-100 text-blue-700
+                                    @elseif($a['kategori'] == 'Batur Tubing Mini') bg-orange-100 text-orange-700
+                                    @elseif($a['kategori'] == 'Sukan River Tubing') bg-amber-100 text-amber-700
+                                    @elseif($a['kategori'] == 'Kolam Renang') bg-cyan-100 text-cyan-700
+                                    @elseif($a['kategori'] == 'Warung Pokdarwis') bg-purple-100 text-purple-700
+                                    @elseif($a['kategori'] == 'UMKM') bg-indigo-100 text-indigo-700
+                                    @elseif($a['kategori'] == 'Pelet') bg-teal-100 text-teal-700
                                     @elseif($a['kategori'] == 'Ikan Hias') bg-pink-100 text-pink-700
+                                    @elseif($a['kategori'] == 'Gasebo') bg-lime-100 text-lime-700
+                                    @elseif($a['kategori'] == 'Paket Wisata') bg-yellow-100 text-yellow-700
                                     @else bg-green-100 text-green-700
                                     @endif">
                                     {{ $a['kategori'] }}
