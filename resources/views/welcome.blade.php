@@ -21,7 +21,7 @@
             Masuk ke Sistem
         </a>
     </nav>
-
+    
     {{-- Hero Section --}}
     <main class="flex-1 flex items-center">
         <div class="max-w-6xl mx-auto px-6 py-16 w-full">
@@ -29,11 +29,9 @@
 
                 {{-- Kiri: Teks utama --}}
                 <div>
-                    <span class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                        Sistem Manajemen Terpadu
-                    </span>
+                    
                     <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
-                        Selamat Datang di <span class="text-green-700">Desa Wisata</span>
+                        Selamat Datang di <span class="text-green-700">Desa Wisata Minapadi</span>
                     </h1>
                     <p class="text-gray-500 text-lg mb-8 leading-relaxed">
                         Platform pengelolaan operasional wisata yang terintegrasi — mulai dari tiket masuk, wahana tubing, kolam renang, kuliner, hingga stok barang, semua dalam satu sistem.

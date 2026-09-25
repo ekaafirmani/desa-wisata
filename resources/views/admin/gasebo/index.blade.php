@@ -80,4 +80,6 @@
         </table>
     </div>
 
+    @include('admin.partials.pagination', ['items' => $gasebo])
+
 @endsection

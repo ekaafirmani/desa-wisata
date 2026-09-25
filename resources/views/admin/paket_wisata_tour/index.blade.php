@@ -29,7 +29,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($paket as $index => $p)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">{{ $index + 1 }}</td>
+                        <td class="px-6 py-4">{{ ($paket->firstItem() ?? 0) + $index }}</td>
                         <td class="px-6 py-4 font-medium">{{ $p->nama_paket }}</td>
                         <td class="px-6 py-4 text-gray-500">{{ $p->fasilitas ?? '-' }}</td>
                         <td class="px-6 py-4">Rp {{ number_format($p->harga_per_orang, 0, ',', '.') }}</td>
@@ -74,6 +74,8 @@
             </table>
         </div>
     </div>
+
+    @include('admin.partials.pagination', ['items' => $paket])
 
     {{-- Modal Tambah Paket --}}
     <div id="modalTambah" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">

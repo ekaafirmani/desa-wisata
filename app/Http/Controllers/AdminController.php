@@ -12,6 +12,7 @@ use App\Models\TransaksiKuliner;
 use App\Models\PaketTubing;
 use App\Models\MenuKuliner;
 use App\Models\MasterStok;
+use App\Models\Pengeluaran;
 use App\Models\LapakUmkm;
 use App\Models\PembayaranUmkm;
 use App\Models\PaketWisata;
@@ -289,7 +290,9 @@ class AdminController extends Controller
     // Halaman daftar semua petugas
     public function petugas()
     {
-        $petugas = User::where('role', '!=', 'admin')->get();
+        $petugas = User::where('role', '!=', 'admin')
+            ->paginate(10)
+            ->withQueryString();
         return view('admin.petugas.index', compact('petugas'));
     }
 
@@ -380,7 +383,8 @@ class AdminController extends Controller
     // Halaman kelola paket tubing
     public function paketTubing()
     {
-        $paket = PaketTubing::all();
+        $paket = PaketTubing::paginate(10)
+            ->withQueryString();
         return view('admin.paket_tubing.index', compact('paket'));
     }
 
@@ -454,7 +458,8 @@ class AdminController extends Controller
     // Halaman kelola menu kuliner
     public function menuKuliner()
     {
-        $menu = MenuKuliner::all();
+        $menu = MenuKuliner::paginate(10)
+            ->withQueryString();
         return view('admin.menu_kuliner.index', compact('menu'));
     }
 
@@ -525,7 +530,8 @@ class AdminController extends Controller
     // Halaman kelola stok
     public function stok()
     {
-        $stok = MasterStok::all();
+        $stok = MasterStok::paginate(10)
+            ->withQueryString();
         return view('admin.stok.index', compact('stok'));
     }
 
@@ -578,6 +584,74 @@ class AdminController extends Controller
 
         return redirect()->route('admin.stok')
             ->with('success', 'Stok berhasil diperbarui!');
+    }
+
+    // Daftar pengeluaran bulan ini
+    public function pengeluaran()
+    {
+        $pengeluaran = Pengeluaran::whereYear('tanggal', now()->year)
+            ->whereMonth('tanggal', now()->month)
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.pengeluaran.index', compact('pengeluaran'));
+    }
+
+    // Form tambah pengeluaran
+    public function tambahPengeluaran()
+    {
+        return view('admin.pengeluaran.tambah');
+    }
+
+    // Simpan pengeluaran baru
+    public function simpanPengeluaran(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_pengeluaran' => 'required|string|max:255',
+            'nominal' => 'required|integer|min:0',
+            'tanggal' => 'required|date',
+        ]);
+
+        Pengeluaran::create($validated);
+
+        return redirect()->route('admin.pengeluaran')
+            ->with('success', 'Pengeluaran berhasil ditambahkan!');
+    }
+
+    // Form edit pengeluaran
+    public function editPengeluaran($id)
+    {
+        $pengeluaran = Pengeluaran::findOrFail($id);
+
+        return view('admin.pengeluaran.edit', compact('pengeluaran'));
+    }
+
+    // Update pengeluaran
+    public function updatePengeluaran(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'nama_pengeluaran' => 'required|string|max:255',
+            'nominal' => 'required|integer|min:0',
+            'tanggal' => 'required|date',
+        ]);
+
+        $pengeluaran = Pengeluaran::findOrFail($id);
+        $pengeluaran->update($validated);
+
+        return redirect()->route('admin.pengeluaran')
+            ->with('success', 'Pengeluaran berhasil diperbarui!');
+    }
+
+    // Hapus pengeluaran
+    public function hapusPengeluaran($id)
+    {
+        $pengeluaran = Pengeluaran::findOrFail($id);
+        $pengeluaran->delete();
+
+        return redirect()->route('admin.pengeluaran')
+            ->with('success', 'Pengeluaran berhasil dihapus!');
     }
 
     // Kumpulkan data laporan (dipakai bareng oleh web, PDF, Excel)
@@ -807,7 +881,8 @@ class AdminController extends Controller
     // Halaman daftar lapak UMKM
     public function umkm()
     {
-        $lapak = LapakUmkm::all();
+        $lapak = LapakUmkm::paginate(10)
+            ->withQueryString();
         $bulanIni = now()->month;
         $tahunIni = now()->year;
         return view('admin.umkm.index', compact('lapak', 'bulanIni', 'tahunIni'));
@@ -927,7 +1002,8 @@ class AdminController extends Controller
     // Halaman daftar paket wisata
     public function paketWisata()
     {
-        $paket = PaketWisata::all();
+        $paket = PaketWisata::paginate(10)
+            ->withQueryString();
         return view('admin.paket_wisata_tour.index', compact('paket'));
     }
 
@@ -996,7 +1072,9 @@ class AdminController extends Controller
     // Daftar gasebo
     public function gasebo()
     {
-        $gasebo = Gasebo::latest()->get();
+        $gasebo = Gasebo::latest()
+            ->paginate(10)
+            ->withQueryString();
         return view('admin.gasebo.index', compact('gasebo'));
     }
 

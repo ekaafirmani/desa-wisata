@@ -92,6 +92,8 @@
                     </tbody>
                 </table>
             </div>
+
+            @include('loket.partials.pagination', ['items' => $riwayatHariIni])
         </div>
 
     </div>

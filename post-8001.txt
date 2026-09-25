@@ -1,0 +1,23 @@
+HTTP/1.1 302 Found
+Host: 127.0.0.1:8001
+Connection: close
+X-Powered-By: PHP/8.3.22
+Cache-Control: no-cache, private
+Date: Fri, 25 Sep 2026 14:38:41 GMT
+Location: http://127.0.0.1:8001/admin/dashboard
+Content-Type: text/html; charset=utf-8
+Set-Cookie: XSRF-TOKEN=eyJpdiI6IkhtMnE1TlZBOEtFbS81RUVuTG9uMVE9PSIsInZhbHVlIjoiOHlGZERQcXZwcWxhZVdLUmxWUXhJQnh6ekxDODd0c3orK1daZllYQW8yU2VFdkxhTDMyeXFzcWRESjdtYmsva25sMlpiR1VtSWRxMFJSVG03anpyT0NuZm5Oc3hSR0JhSWM3eHZGcUVRdTVzT1B3eFhmdW1qaEtEN282eVRJRWsiLCJtYWMiOiJhZmNiMGMxMjE3OWI5Y2NhYmM5NjBmMjJhNWI2MzE3ZmY4OWRjYWFjOTlmNTk0YTI0ZjU4NmMyNmZiNmRkNzk4IiwidGFnIjoiIn0%3D; expires=Fri, 25 Sep 2026 16:38:41 GMT; Max-Age=7200; path=/; samesite=lax
+Set-Cookie: laravel_session=eyJpdiI6Im9KNW1BRzk0NHNQeTJHUUxMVUNVYkE9PSIsInZhbHVlIjoidmxVaE16S1RLcUdlRk5EM2llWVFzcGsyT3ppVUgzQm13ZG1QNjdQN2ZBYlZVcGg4VDBHS0RST3VVdTFxZXgvR3RuMjM1dUZvOHNaUjZ5ZFdZeHBqZnRFVThzNkgya01Fc08zVlhDVWdLVldJVjRjbDZianNLeXVNL1JnUnJNaXQiLCJtYWMiOiJmYmIxZWZkYjkxYzBlZjE1ZmEwYzdhMTU3ZDRjYmNlMmVkMTZjZjFjOWRmOWFmMjhlZDQ1Yzg5NjhmZjI4OThiIiwidGFnIjoiIn0%3D; expires=Fri, 25 Sep 2026 16:38:41 GMT; Max-Age=7200; path=/; httponly; samesite=lax
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="0;url='http://127.0.0.1:8001/admin/dashboard'" />
+
+        <title>Redirecting to http://127.0.0.1:8001/admin/dashboard</title>
+    </head>
+    <body>
+        Redirecting to <a href="http://127.0.0.1:8001/admin/dashboard">http://127.0.0.1:8001/admin/dashboard</a>.
+    </body>
+</html>

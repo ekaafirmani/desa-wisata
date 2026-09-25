@@ -30,12 +30,15 @@ class LoketController extends Controller
     // Halaman Tiket Masuk
     public function tiket()
     {
-        $riwayatHariIni = TiketMasuk::where('user_id', auth()->id())
-            ->whereDate('created_at', today())
-            ->latest()
-            ->get();
+        $riwayatQuery = TiketMasuk::where('user_id', auth()->id())
+            ->whereDate('created_at', today());
 
-        $totalHariIni = $riwayatHariIni->sum('total_bayar');
+        $totalHariIni = (clone $riwayatQuery)->sum('total_bayar');
+
+        $riwayatHariIni = (clone $riwayatQuery)
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
 
         return view('loket.tiket', [
             'hargaTiket' => self::HARGA_TIKET,
@@ -72,13 +75,16 @@ class LoketController extends Controller
     {
         $stokPakanIkan = MasterStok::where('jenis', 'pakan_ikan')->first();
 
-        $riwayatPakanIkan = PakanIkan::where('user_id', auth()->id())
+        $riwayatQuery = PakanIkan::where('user_id', auth()->id())
             ->where('titik_jual', 'loket')
-            ->whereDate('created_at', today())
-            ->latest()
-            ->get();
+            ->whereDate('created_at', today());
 
-        $totalHariIni = $riwayatPakanIkan->sum('total_bayar');
+        $totalHariIni = (clone $riwayatQuery)->sum('total_bayar');
+
+        $riwayatPakanIkan = (clone $riwayatQuery)
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
 
         return view('loket.pakan_ikan', [
             'stokPakanIkan' => $stokPakanIkan,
@@ -117,15 +123,18 @@ class LoketController extends Controller
                         ->latest()
                         ->get();
 
-        $riwayatHariIni = SewaGasebo::with('gasebo')
-                            ->whereHas('gasebo', fn($q) => $q->where('jenis', 'kecil'))
-                            ->where('user_id', auth()->id())
-                            ->whereDate('created_at', today())
-                            ->where('status', 'selesai')
-                            ->latest()
-                            ->get();
+        $riwayatQuery = SewaGasebo::with('gasebo')
+            ->whereHas('gasebo', fn($q) => $q->where('jenis', 'kecil'))
+            ->where('user_id', auth()->id())
+            ->whereDate('created_at', today())
+            ->where('status', 'selesai');
 
-        $totalHariIni = $riwayatHariIni->sum('total_bayar');
+        $totalHariIni = (clone $riwayatQuery)->sum('total_bayar');
+
+        $riwayatHariIni = (clone $riwayatQuery)
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
 
         return view('loket.gasebo', compact(
             'gaseboList', 'sewaAktif', 'riwayatHariIni', 'totalHariIni'

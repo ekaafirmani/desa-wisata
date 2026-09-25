@@ -71,6 +71,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/stok/simpan', [AdminController::class, 'simpanStok'])->name('stok.simpan');
     Route::patch('/stok/{id}', [AdminController::class, 'updateStok'])->name('stok.update');
 
+    // Pengeluaran
+    Route::get('/pengeluaran', [AdminController::class, 'pengeluaran'])->name('pengeluaran');
+    Route::get('/pengeluaran/tambah', [AdminController::class, 'tambahPengeluaran'])->name('pengeluaran.tambah');
+    Route::post('/pengeluaran/simpan', [AdminController::class, 'simpanPengeluaran'])->name('pengeluaran.simpan');
+    Route::get('/pengeluaran/{id}/edit', [AdminController::class, 'editPengeluaran'])->name('pengeluaran.edit');
+    Route::patch('/pengeluaran/{id}/update', [AdminController::class, 'updatePengeluaran'])->name('pengeluaran.update');
+    Route::delete('/pengeluaran/{id}', [AdminController::class, 'hapusPengeluaran'])->name('pengeluaran.hapus');
+
    // Master data gasebo
     Route::get('/gasebo', [AdminController::class, 'gasebo'])->name('gasebo');
     Route::get('/gasebo/tambah', [AdminController::class, 'tambahGasebo'])->name('gasebo.tambah');

@@ -31,7 +31,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($lapak as $index => $l)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">{{ $index + 1 }}</td>
+                        <td class="px-6 py-4">{{ ($lapak->firstItem() ?? 0) + $index }}</td>
                         <td class="px-6 py-4 font-medium">{{ $l->nama_pedagang }}</td>
                         <td class="px-6 py-4">{{ $l->nama_usaha }}</td>
                         <td class="px-6 py-4 text-gray-500">{{ $l->jenis_usaha }}</td>
@@ -80,5 +80,7 @@
             </table>
         </div>
     </div>
+
+    @include('admin.partials.pagination', ['items' => $lapak])
 
 @endsection

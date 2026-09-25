@@ -42,7 +42,7 @@ class PakanIkanService
         $totalBayar = self::HARGA_PER_PORSI * $jumlahPorsi;
 
         $transaksi = DB::transaction(function () use ($userId, $titikJual, $jumlahPorsi, $totalBayar, $stok) {
-            $stok->decrement('tersedia', $jumlahPorsi);
+            $stok->kurangiStok($jumlahPorsi);   
 
             return PakanIkan::create([
                 'user_id'      => $userId,

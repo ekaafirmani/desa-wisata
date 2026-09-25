@@ -62,6 +62,8 @@
                     </tbody>
                 </table>
             </div>
+
+            @include('loket.partials.pagination', ['items' => $riwayatPakanIkan])
         </div>
 
     </div>

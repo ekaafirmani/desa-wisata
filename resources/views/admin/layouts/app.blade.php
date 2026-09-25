@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans overflow-hidden">
 
     <div
         class="md:hidden fixed top-0 left-0 right-0 z-50 bg-green-800 shadow px-4 py-3 flex items-center justify-between">
@@ -22,17 +22,17 @@
 
     <div id="overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"></div>
 
-    <div class="flex min-h-screen">
+    <div class="flex h-screen overflow-hidden">
 
         {{-- Sidebar --}}
         <aside id="sidebar"
-            class="w-64 bg-green-800 text-white flex flex-col fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-300 md:relative md:translate-x-0">
+            class="w-64 h-screen shrink-0 overflow-hidden bg-green-800 text-white flex flex-col fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-300 md:relative md:translate-x-0">
             <div class="p-6 border-b border-green-700">
                 <h1 class="text-xl font-bold">Desa Wisata</h1>
                 <p class="text-green-300 text-sm mt-1">Panel Admin</p>
             </div>
 
-            <nav class="flex-1 p-4 space-y-1">
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1">
                 <a href="{{ route('admin.dashboard') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.dashboard') ? 'bg-green-700' : '' }}">
                     <span>📊</span> Dashboard
@@ -69,6 +69,11 @@
                     class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.stok*') ? 'bg-green-700' : '' }}">
                     <span>📦</span> Kelola Stok
                 </a>
+
+                <a href="{{ route('admin.pengeluaran') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.pengeluaran*') ? 'bg-green-700' : '' }}">
+                    <span>💸</span> Pengeluaran
+                </a>
                 
                 <a href="{{ route('admin.laporan') }}"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-green-700 {{ request()->routeIs('admin.laporan') ? 'bg-green-700' : '' }}">
@@ -91,7 +96,7 @@
         </aside>
 
         {{-- Konten utama --}}
-        <main class="flex-1 p-8 pt-14 md:pt-8">
+        <main class="flex-1 min-w-0 h-screen overflow-y-auto p-8 pt-14 md:pt-8">
 
             {{-- Notifikasi sukses --}}
             @if(session('success'))

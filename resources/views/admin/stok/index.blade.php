@@ -94,4 +94,6 @@
         </table>
     </div>
 
+    @include('admin.partials.pagination', ['items' => $stok])
+
 @endsection

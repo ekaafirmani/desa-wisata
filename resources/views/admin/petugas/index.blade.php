@@ -83,4 +83,6 @@
         </table>
     </div>
 
+    @include('admin.partials.pagination', ['items' => $petugas])
+
 @endsection

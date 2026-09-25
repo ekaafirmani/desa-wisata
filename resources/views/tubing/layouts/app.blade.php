@@ -6,7 +6,7 @@
     <title>@yield('title', 'Tubing') - Desa Wisata</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans overflow-hidden">
 
     {{-- Tombol hamburger (hanya muncul di mobile) --}}
     <div class="md:hidden fixed top-0 left-0 right-0 z-50 bg-orange-700 px-4 py-3 flex items-center justify-between">
@@ -23,10 +23,10 @@
     <div id="overlay" onclick="toggleSidebar()"
         class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"></div>
 
-    <div class="flex min-h-screen">
+    <div class="flex h-screen overflow-hidden">
 
         {{-- Sidebar --}}
-        <aside class="w-64 bg-orange-700 text-white flex flex-col fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-300 md:relative md:translate-x-0"
+        <aside class="w-64 h-screen shrink-0 overflow-hidden bg-orange-700 text-white flex flex-col fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-300 md:relative md:translate-x-0"
         id="sidebar">
             <div class="p-6 border-b border-orange-600">
                 <h1 class="text-xl font-bold">Desa Wisata</h1>
@@ -35,7 +35,7 @@
                 </p>
             </div>
 
-            <nav class="flex-1 p-4 space-y-1">
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1">
                 <a href="{{ route('tubing.dashboard') }}"
                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-orange-600 {{ request()->routeIs('tubing.dashboard') ? 'bg-orange-600' : '' }}">
                     <span>🚣</span> Transaksi Tubing
@@ -57,7 +57,7 @@
         </aside>
 
         {{-- Konten utama --}}
-        <main class="flex-1 p-8 pt-14 md:pt-8">
+        <main class="flex-1 min-w-0 h-screen overflow-y-auto p-8 pt-14 md:pt-8">
 
             {{-- Notifikasi sukses --}}
             @if(session('success'))

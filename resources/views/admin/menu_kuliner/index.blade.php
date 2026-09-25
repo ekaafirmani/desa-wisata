@@ -74,4 +74,6 @@
         </table>
     </div>
 
+    @include('admin.partials.pagination', ['items' => $menu])
+
 @endsection
