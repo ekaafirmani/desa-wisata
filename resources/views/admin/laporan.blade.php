@@ -6,7 +6,7 @@
 
     {{-- Header (disembunyikan saat print) --}}
     <div class="flex items-center justify-between mb-6 print:hidden">
-        <h2 class="text-2xl font-bold text-gray-800">Laporan Pendapatan</h2>
+        <h2 class="text-2xl font-bold text-gray-800">{{ $judulLaporan }}</h2>
         <div class="flex gap-2">
             <a href="{{ route('admin.laporan.pdf', request()->query()) }}"
                 class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
@@ -21,69 +21,94 @@
 
     {{-- Form filter (disembunyikan saat print) --}}
     <div class="bg-white rounded-xl shadow p-5 mb-6 print:hidden">
-        <form method="GET" action="{{ route('admin.laporan') }}" class="flex flex-wrap gap-4 items-center">
+        <form method="GET" action="{{ route('admin.laporan') }}"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 
             {{-- Filter tipe --}}
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Periode</label>
                 <select name="tipe" onchange="this.form.submit()"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
                     <option value="hari" {{ $filterTipe == 'hari' ? 'selected' : '' }}>Per Hari</option>
                     <option value="bulan" {{ $filterTipe == 'bulan' ? 'selected' : '' }}>Per Bulan</option>
                 </select>
             </div>
 
             {{-- Filter tanggal / bulan --}}
-            @if ($filterTipe === 'bulan')
-                <div>
+            <div>
+                @if ($filterTipe === 'bulan')
                     <label class="block text-xs font-medium text-gray-600 mb-1">Bulan</label>
                     <input type="month" name="bulan" value="{{ $filterBulan }}"
-                        class="min-w-[160px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
-                </div>
-            @else
-                <div>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                @else
                     <label class="block text-xs font-medium text-gray-600 mb-1">Tanggal</label>
                     <input type="date" name="tanggal" value="{{ $filterTanggal }}"
-                        class="min-w-[160px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
-                </div>
-            @endif
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                @endif
+            </div>
 
             {{-- Filter kategori --}}
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">Kategori</label>
                 <select name="kategori"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600">
                     <option value="semua" {{ $filterKategori == 'semua' ? 'selected' : '' }}>Semua Kategori</option>
                     <option value="tiket_masuk" {{ $filterKategori == 'tiket_masuk' ? 'selected' : '' }}>Tiket Masuk</option>
                     <option value="tubing" {{ $filterKategori == 'tubing' ? 'selected' : '' }}>Tubing</option>
                     <option value="kolam" {{ $filterKategori == 'kolam' ? 'selected' : '' }}>Kolam</option>
                     <option value="kuliner" {{ $filterKategori == 'kuliner' ? 'selected' : '' }}>Kuliner</option>
                     <option value="pakan_ikan" {{ $filterKategori == 'pakan_ikan' ? 'selected' : '' }}>Pakan Ikan</option>
-                    <option value="gazebo" {{ $filterKategori == 'gazebo' ? 'selected' : '' }}>Gazebo</option>
+                    <option value="gasebo" {{ $filterKategori == 'gasebo' ? 'selected' : '' }}>Gasebo</option>
                     <option value="ikan_hias" {{ $filterKategori == 'ikan_hias' ? 'selected' : '' }}>Ikan Hias</option>
+                    <option value="pengeluaran" {{ $filterKategori == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
                 </select>
             </div>
 
-            <button type="submit"
-                class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                Tampilkan
-            </button>
+            {{-- Tombol --}}
+            <div>
+                <button type="submit"
+                    class="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Tampilkan
+                </button>
+            </div>
         </form>
     </div>
 
     {{-- Header laporan (muncul saat print) --}}
     <div class="hidden print:block mb-6 text-center border-b pb-4">
-        <h1 class="text-2xl font-bold">Laporan Pendapatan Desa Wisata</h1>
+        <h1 class="text-2xl font-bold">{{ $judulLaporan }} Desa Wisata</h1>
         <p class="text-gray-600 mt-1">Periode: {{ $labelPeriode }}</p>
-        <p class="text-gray-500 text-sm">Dicetak pada: {{ now()->translatedFormat('d F Y, H:i') }}</p>
+        <p class="text-gray-500 text-sm mt-1">{{ $alamatLaporan }}</p>
+        <p class="text-gray-500 text-sm">Dicetak pada: {{ $tanggalCetak }}</p>
     </div>
 
-    {{-- Ringkasan grand total --}}
-    <div
-        class="bg-green-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
-        <p class="text-green-200 text-sm print:text-gray-500">Total Pendapatan — {{ $labelPeriode }}</p>
-        <p class="text-3xl font-bold mt-1">Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
-    </div>
+    @if ($isLaporanPengeluaran)
+        <div
+            class="bg-red-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
+            <p class="text-red-200 text-sm print:text-gray-500">Grand Total Pengeluaran — {{ $labelPeriode }}</p>
+            <p class="text-3xl font-bold mt-1">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+        </div>
+    @else
+        <div
+            class="bg-green-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
+            <p class="text-green-200 text-sm print:text-gray-500">Grand Total Pendapatan — {{ $labelPeriode }}</p>
+            <p class="text-3xl font-bold mt-1">Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
+        </div>
+
+        @if ($tampilkanRingkasanBulanan)
+            <div
+                class="bg-red-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
+                <p class="text-red-200 text-sm print:text-gray-500">Grand Total Pengeluaran — {{ $labelPeriode }}</p>
+                <p class="text-3xl font-bold mt-1">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+            </div>
+
+            <div
+                class="bg-blue-700 rounded-xl p-5 mb-6 text-white print:bg-white print:border print:border-gray-300 print:text-gray-800">
+                <p class="text-blue-200 text-sm print:text-gray-500">Pendapatan Bersih — {{ $labelPeriode }}</p>
+                <p class="text-3xl font-bold mt-1">Rp {{ number_format($totalPendapatanBersih, 0, ',', '.') }}</p>
+            </div>
+        @endif
+    @endif
 
     {{-- Tabel per kategori --}}
     @forelse ($data as $key => $kategori)
@@ -133,6 +158,12 @@
                     </table>
                 </div>
             @endif
+
+            @if (isset($kategori['pagination']) && $kategori['pagination']->hasPages())
+                <div class="px-4 pb-4 pt-2">
+                    {{ $kategori['pagination']->links() }}
+                </div>
+            @endif
         </div>
     @empty
         <div class="bg-white rounded-xl shadow p-10 text-center text-gray-400">
@@ -140,10 +171,12 @@
         </div>
     @endforelse
 
-    {{-- Grand total bawah (untuk print) --}}
-    <div class="hidden print:block border-t-2 border-gray-800 pt-4 mt-4 text-right">
-        <p class="text-lg font-bold">Grand Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
-    </div>
+    @if (!$isLaporanPengeluaran)
+        {{-- Grand total bawah (untuk print) --}}
+        <div class="hidden print:block border-t-2 border-gray-800 pt-4 mt-4 text-right">
+            <p class="text-lg font-bold">Grand Total Pendapatan: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
+        </div>
+    @endif
 
     {{-- CSS Print --}}
     <style>

@@ -20,6 +20,7 @@ use App\Models\TransaksiPaketWisata;
 use App\Models\Gasebo;
 use App\Models\SewaGasebo;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\IkanHiasPenjualan;
 use Maatwebsite\Excel\Facades\Excel;
@@ -654,6 +655,88 @@ class AdminController extends Controller
             ->with('success', 'Pengeluaran berhasil dihapus!');
     }
 
+    private function namaBulanIndonesia(int $bulan): string
+    {
+        return [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ][$bulan] ?? (string) $bulan;
+    }
+
+    private function namaHariIndonesia(int $hari): string
+    {
+        return [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ][$hari] ?? '-';
+    }
+
+    private function formatPeriodeIndonesia(\Carbon\Carbon $tanggal, bool $perBulan): string
+    {
+        if ($perBulan) {
+            return 'Bulan ' . $this->namaBulanIndonesia($tanggal->month) . ' ' . $tanggal->year;
+        }
+
+        return $this->namaHariIndonesia($tanggal->dayOfWeekIso) . ', '
+            . $tanggal->day . ' '
+            . $this->namaBulanIndonesia($tanggal->month) . ' '
+            . $tanggal->year;
+    }
+
+    private function formatTanggalCetakIndonesia(): string
+    {
+        $now = now();
+
+        return $this->namaHariIndonesia($now->dayOfWeekIso) . ', '
+            . $now->day . ' '
+            . $this->namaBulanIndonesia($now->month) . ' '
+            . $now->year . ', '
+            . $now->format('H:i') . ' WIB';
+    }
+
+    private function paginateLaporanData(array $data, Request $request): array
+    {
+        $perPage = 10;
+
+        foreach ($data['data'] as $key => $kategori) {
+            $pageName = 'laporan_' . $key;
+            $currentPage = max(1, (int) $request->input($pageName, 1));
+            $items = $kategori['baris'];
+
+            $paginator = new LengthAwarePaginator(
+                $items->forPage($currentPage, $perPage)->values(),
+                $items->count(),
+                $perPage,
+                $currentPage,
+                [
+                    'path' => $request->url(),
+                    'pageName' => $pageName,
+                ]
+            );
+            $paginator->withQueryString();
+
+            $data['data'][$key]['baris'] = $paginator;
+            $data['data'][$key]['pagination'] = $paginator;
+        }
+
+        return $data;
+    }
+
     // Kumpulkan data laporan (dipakai bareng oleh web, PDF, Excel)
     private function generateLaporanData(Request $request): array
     {
@@ -665,11 +748,11 @@ class AdminController extends Controller
         if ($filterTipe === 'bulan') {
             $dari = \Carbon\Carbon::parse($filterBulan . '-01')->startOfMonth();
             $sampai = \Carbon\Carbon::parse($filterBulan . '-01')->endOfMonth();
-            $labelPeriode = 'Bulan ' . \Carbon\Carbon::parse($filterBulan)->translatedFormat('F Y');
+            $labelPeriode = $this->formatPeriodeIndonesia($dari, true);
         } else {
             $dari = \Carbon\Carbon::parse($filterTanggal)->startOfDay();
             $sampai = \Carbon\Carbon::parse($filterTanggal)->endOfDay();
-            $labelPeriode = \Carbon\Carbon::parse($filterTanggal)->translatedFormat('l, d F Y');
+            $labelPeriode = $this->formatPeriodeIndonesia($dari, false);
         }
 
         $data = [];
@@ -835,11 +918,58 @@ class AdminController extends Controller
             ];
         }
 
-        $grandTotal = collect($data)->sum('total');
+        $grandTotal = collect($data)->except('pengeluaran')->sum('total');
+        $totalPengeluaran = null;
+
+        if ($filterKategori === 'pengeluaran') {
+            $pengeluaran = Pengeluaran::whereBetween('tanggal', [
+                $dari->toDateString(),
+                $sampai->toDateString(),
+            ])
+                ->latest('tanggal')
+                ->latest('id')
+                ->get();
+
+            $data['pengeluaran'] = [
+                'label' => '💸 Pengeluaran',
+                'label_bersih' => 'Pengeluaran',
+                'total' => $pengeluaran->sum('nominal'),
+                'kolom' => ['Tanggal', 'Nama Pengeluaran', 'Nominal'],
+                'baris' => $pengeluaran->map(fn($p) => [
+                    $p->tanggal->format('d/m/Y'),
+                    $p->nama_pengeluaran,
+                    'Rp ' . number_format($p->nominal, 0, ',', '.'),
+                ]),
+            ];
+
+            $totalPengeluaran = $data['pengeluaran']['total'];
+        } elseif ($filterTipe === 'bulan') {
+            $totalPengeluaran = Pengeluaran::whereBetween('tanggal', [
+                $dari->toDateString(),
+                $sampai->toDateString(),
+            ])->sum('nominal');
+        }
+
+        $totalPengeluaran ??= 0;
+        $isLaporanPengeluaran = $filterKategori === 'pengeluaran';
+        $tampilkanRingkasanBulanan = $filterTipe === 'bulan' && !$isLaporanPengeluaran;
+        $totalPendapatanBersih = $grandTotal - $totalPengeluaran;
+        $judulLaporan = $isLaporanPengeluaran
+            ? 'Laporan Pengeluaran'
+            : 'Laporan Pendapatan';
+        $alamatLaporan = 'Desa Wisata Minapadi, Desa Panembangan, Kec. Cilongok, Kab. Banyumas.';
+        $tanggalCetak = $this->formatTanggalCetakIndonesia();
 
         return [
             'data' => $data,
             'grandTotal' => $grandTotal,
+            'totalPengeluaran' => $totalPengeluaran,
+            'totalPendapatanBersih' => $totalPendapatanBersih,
+            'isLaporanPengeluaran' => $isLaporanPengeluaran,
+            'tampilkanRingkasanBulanan' => $tampilkanRingkasanBulanan,
+            'judulLaporan' => $judulLaporan,
+            'alamatLaporan' => $alamatLaporan,
+            'tanggalCetak' => $tanggalCetak,
             'filterKategori' => $filterKategori,
             'filterTipe' => $filterTipe,
             'filterTanggal' => $filterTanggal,
@@ -851,7 +981,9 @@ class AdminController extends Controller
     // Halaman web laporan
     public function laporan(Request $request)
     {
-        return view('admin.laporan', $this->generateLaporanData($request));
+        $data = $this->generateLaporanData($request);
+
+        return view('admin.laporan', $this->paginateLaporanData($data, $request));
     }
 
     // Export PDF

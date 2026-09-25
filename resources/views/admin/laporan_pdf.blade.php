@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Pendapatan</title>
+    <title>{{ $judulLaporan }}</title>
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -13,6 +13,18 @@
             font-size: 15px;
             text-align: center;
             margin-bottom: 4px;
+        }
+        .kop {
+            text-align: center;
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+        .print-footer {
+            position: fixed;
+            bottom: 10px;
+            left: 12px;
+            font-size: 9px;
+            color: #555;
         }
         h2 {
             font-size: 12px;
@@ -54,7 +66,8 @@
 </head>
 <body>
 
-    <h1>Laporan Pendapatan Periode {{ $labelPeriode }} Desa Wisata Minapadi</h1>
+    <h1>{{ $judulLaporan }} Periode {{ $labelPeriode }}</h1>
+    <p class="kop">{{ $alamatLaporan }}</p>
 
     @forelse ($data as $kategori)
         <h2>{{ $kategori['label_bersih'] }}</h2>
@@ -91,7 +104,17 @@
         <p class="kosong">Tidak ada data untuk periode ini.</p>
     @endforelse
 
-    <p class="grand-total">Grand Total: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
+    @if ($isLaporanPengeluaran)
+        <p class="grand-total">Grand Total Pengeluaran: Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+    @else
+        <p class="grand-total">Grand Total Pendapatan: Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
+
+        @if ($tampilkanRingkasanBulanan)
+            <p class="grand-total">Grand Total Pengeluaran: Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</p>
+            <p class="grand-total">Pendapatan Bersih: Rp {{ number_format($totalPendapatanBersih, 0, ',', '.') }}</p>
+        @endif
+    @endif
+    <p class="print-footer">Dicetak pada: {{ $tanggalCetak }}</p>
 
 </body>
 </html>

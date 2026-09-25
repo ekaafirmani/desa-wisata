@@ -1,7 +1,8 @@
 <table>
     <tr>
-        <td colspan="2"><strong>Laporan Pendapatan Periode {{ $labelPeriode }} Desa Wisata Minapadi</strong></td>
+        <td colspan="2" style="font-size: 15px;"><strong>{{ $judulLaporan }} Periode {{ $labelPeriode }}</strong></td>
     </tr>
+    <tr><td colspan="2" style="font-size: 15px;">{{ $alamatLaporan }}</td></tr>
     <tr><td colspan="2"></td></tr>
 
     @forelse ($data as $kategori)
@@ -39,8 +40,29 @@
         </tr>
     @endforelse
 
+    @if ($isLaporanPengeluaran)
+        <tr>
+            <td><strong>Grand Total Pengeluaran</strong></td>
+            <td><strong>Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</strong></td>
+        </tr>
+    @else
+        <tr>
+            <td><strong>Grand Total Pendapatan</strong></td>
+            <td><strong>Rp {{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
+        </tr>
+
+        @if ($tampilkanRingkasanBulanan)
+            <tr>
+                <td><strong>Grand Total Pengeluaran</strong></td>
+                <td><strong>Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Pendapatan Bersih</strong></td>
+                <td><strong>Rp {{ number_format($totalPendapatanBersih, 0, ',', '.') }}</strong></td>
+            </tr>
+        @endif
+    @endif
     <tr>
-        <td><strong>Grand Total</strong></td>
-        <td><strong>Rp {{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
+        <td colspan="2">Dicetak pada: {{ $tanggalCetak }}</td>
     </tr>
 </table>
