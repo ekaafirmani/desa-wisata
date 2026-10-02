@@ -35,6 +35,18 @@
                 </div>
 
                 <div>
+                    <label for="kategori" class="text-xs font-medium text-gray-600">Kategori</label>
+                    <select id="kategori" name="kategori" required
+                            class="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="operasional" {{ old('kategori', $pengeluaran->kategori) == 'operasional' ? 'selected' : '' }}>Operasional</option>
+                        <option value="perawatan" {{ old('kategori', $pengeluaran->kategori) == 'perawatan' ? 'selected' : '' }}>Perawatan</option>
+                        <option value="honor" {{ old('kategori', $pengeluaran->kategori) == 'honor' ? 'selected' : '' }}>Honor</option>
+                        <option value="lainnya" {{ old('kategori', $pengeluaran->kategori) == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
+                    </select>
+                </div>
+
+                <div>
                     <label for="nominal" class="text-xs font-medium text-gray-600">Nominal (Rp)</label>
                     <input id="nominal" type="number" name="nominal"
                            value="{{ old('nominal', $pengeluaran->nominal) }}"

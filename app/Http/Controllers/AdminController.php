@@ -597,7 +597,19 @@ class AdminController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.pengeluaran.index', compact('pengeluaran'));
+        $totalBulanIni = Pengeluaran::whereYear('tanggal', now()->year)
+            ->whereMonth('tanggal', now()->month)
+            ->sum('nominal');
+
+        $perKategori = Pengeluaran::whereYear('tanggal', now()->year)
+            ->whereMonth('tanggal', now()->month)
+            ->selectRaw('kategori, SUM(nominal) as total')
+            ->groupBy('kategori')
+            ->pluck('total', 'kategori');
+
+        return view('admin.pengeluaran.index', compact(
+            'pengeluaran', 'totalBulanIni', 'perKategori'
+        ));
     }
 
     // Form tambah pengeluaran
@@ -611,8 +623,9 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'nama_pengeluaran' => 'required|string|max:255',
-            'nominal' => 'required|integer|min:0',
-            'tanggal' => 'required|date',
+            'kategori'         => 'required|in:operasional,perawatan,honor,lainnya',
+            'nominal'          => 'required|integer|min:0',
+            'tanggal'          => 'required|date',
         ]);
 
         Pengeluaran::create($validated);
@@ -634,8 +647,9 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'nama_pengeluaran' => 'required|string|max:255',
-            'nominal' => 'required|integer|min:0',
-            'tanggal' => 'required|date',
+            'kategori'         => 'required|in:operasional,perawatan,honor,lainnya',
+            'nominal'          => 'required|integer|min:0',
+            'tanggal'          => 'required|date',
         ]);
 
         $pengeluaran = Pengeluaran::findOrFail($id);

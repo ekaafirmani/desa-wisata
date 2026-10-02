@@ -568,7 +568,7 @@ class DummyDataSeeder extends Seeder
     private function seedGasebo(Carbon $month): void
     {
         $rows = [];
-        $newSchema = Schema::hasColumn('sewa_gazebo', 'gasebo_id');
+        $newSchema = Schema::hasColumn('sewa_gasebo', 'gasebo_id');
 
         $count = $this->randomCount($month, 'Gasebo');
 
@@ -599,7 +599,7 @@ class DummyDataSeeder extends Seeder
                 : [
                     'user_id' => $this->users['admin']->id,
                     'titik_jual' => 'admin',
-                    'jenis_gazebo' => $gasebo->jenis,
+                    'jenis' => $gasebo->jenis,
                     'jumlah' => 1,
                     'catatan' => 'Sewa gasebo dummy',
                     'harga_satuan' => $harga,
@@ -611,7 +611,7 @@ class DummyDataSeeder extends Seeder
             $rows[] = array_merge($row, $this->timestamps($moment));
         }
 
-        $this->insertRows('sewa_gazebo', $rows);
+        $this->insertRows('sewa_gasebo', $rows);
     }
 
     private function seedPaketWisata(Carbon $month): void

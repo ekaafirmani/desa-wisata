@@ -10,6 +10,7 @@ class Pengeluaran extends Model
 
     protected $fillable = [
         'nama_pengeluaran',
+        'kategori',
         'nominal',
         'tanggal',
     ];
